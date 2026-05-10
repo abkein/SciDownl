@@ -21,7 +21,9 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
     sess: requests.Session
     service: ScihubUrlService
 
-    def __init__(self, source: BaseSource, scihub_url: str, task: BaseTask | None = None) -> None:
+    def __init__(
+        self, source: BaseSource, scihub_url: str, task: BaseTask | None = None
+    ) -> None:
         BaseCrawler.__init__(self, source)
         BaseTaskStep.__init__(self, task)
         self.scihub_url = scihub_url
@@ -29,20 +31,26 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
         self.service = ScihubUrlService()
 
         if self.task is not None:
-            self.task.context['source'] = source
-            self.task.context['referer'] = scihub_url
-            self.task.context['status'] = 'crawling'
+            self.task.context["source"] = source
+            self.task.context["referer"] = scihub_url
+            self.task.context["status"] = "crawling"
 
     def crawl(self) -> HtmlContent:
         try:
-            request_params = {
-                'request': self.source[self.source.type]
-            }
-            proxies = cast(dict[str, str], self.task.context.get('proxies', {})) if self.task is not None else {}
-            logger.info(f"<- Request: scihub_url={self.scihub_url}, source={self.source}, proxies={proxies}")
+            request_params = {"request": self.source[self.source.type]}
+            proxies = (
+                cast(dict[str, str], self.task.context.get("proxies", {}))
+                if self.task is not None
+                else {}
+            )
+            logger.info(
+                f"<- Request: scihub_url={self.scihub_url}, source={self.source}, proxies={proxies}"
+            )
 
             res = self.sess.post(self.scihub_url, data=request_params, proxies=proxies)
-            logger.info(f"-> Response: status_code={res.status_code}, content_length={len(res.content.decode())}")
+            logger.info(
+                f"-> Response: status_code={res.status_code}, content_length={len(res.content.decode())}"
+            )
 
             if res.status_code not in ScihubCrawler.OK_STATUS_CODES:
                 raise RuntimeError(f"Error occurs when crawling source: {self.source}")
@@ -50,13 +58,13 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
             content = HtmlContent(res.content.decode())
 
             if self.task is not None:
-                self.task.context['content'] = content
-                self.task.context['status'] = 'crawled'
+                self.task.context["content"] = content
+                self.task.context["status"] = "crawled"
             return content
         except Exception as e:
             if self.task is not None:
-                self.task.context['status'] = 'crawling_failed'
-                self.task.context['error'] = e
+                self.task.context["status"] = "crawling_failed"
+                self.task.context["error"] = e
                 self.service.increment_failed_times(self.scihub_url)
             raise CrawlException(f"Error occurs when crawling: {e}")
 

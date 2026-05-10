@@ -39,9 +39,9 @@ class ScihubUrlService:
             return
         session = self.session_class()
         try:
-            session.query(ScihubUrl).filter_by(url=url).update({
-                ScihubUrl.success_times: ScihubUrl.success_times + 1
-            })
+            session.query(ScihubUrl).filter_by(url=url).update(
+                {ScihubUrl.success_times: ScihubUrl.success_times + 1}
+            )
             session.commit()
         except Exception as e:
             logger.warning(f"Cannot increment success times: {url}, reason: {e}")
@@ -53,9 +53,9 @@ class ScihubUrlService:
             return
         session = self.session_class()
         try:
-            session.query(ScihubUrl).filter_by(url=url).update({
-                ScihubUrl.failed_times: ScihubUrl.failed_times + 1
-            })
+            session.query(ScihubUrl).filter_by(url=url).update(
+                {ScihubUrl.failed_times: ScihubUrl.failed_times + 1}
+            )
             session.commit()
         except Exception as e:
             logger.warning(f"Cannot increment failed times: {url}, reason: {e}")

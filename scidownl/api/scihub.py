@@ -7,12 +7,12 @@ from ..core.task import ScihubTask
 
 
 def scihub_download(
-        keyword: str,
-        paper_type: str = 'doi',
-        scihub_url: str | None = None,
-        out: Path | None = None,
-        proxies: dict[str, str] | None = None
-    ) -> None:
+    keyword: str,
+    paper_type: str = "doi",
+    scihub_url: str | None = None,
+    out: Path | None = None,
+    proxies: dict[str, str] | None = None,
+) -> None:
     """Download a paper from SciHub.
 
     :param keyword: a DOI or a PMID.
@@ -35,5 +35,5 @@ def scihub_download(
         source_type=paper_type,
         scihub_url=scihub_url,
         out=out,
-        proxies=proxies
+        proxies=proxies,
     ).run()

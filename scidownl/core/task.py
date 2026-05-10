@@ -19,8 +19,10 @@ from ..db.service import ScihubUrlService
 logger = get_logger()
 configs = get_config()
 
-scihub_url_chooser_type = configs['scihub.task']['scihub_url_chooser_type']
-default_chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser)
+scihub_url_chooser_type = configs["scihub.task"]["scihub_url_chooser_type"]
+default_chooser_cls = scihub_url_choosers.get(
+    scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser
+)
 
 
 class ScihubTask(BaseTask):
@@ -34,13 +36,15 @@ class ScihubTask(BaseTask):
     service: ScihubUrlService
     updater: CrawlingScihubDomainUpdater
 
-    def __init__(self,
-                 source_keyword: Any,
-                 source_type: str = 'doi',
-                 scihub_url: str | None = None,
-                 scihub_url_chooser_cls: type[ScihubUrlChooser] = default_chooser_cls,
-                 out: Path | None = None,
-                 proxies: dict[str, str] | None = None) -> None:
+    def __init__(
+        self,
+        source_keyword: Any,
+        source_type: str = "doi",
+        scihub_url: str | None = None,
+        scihub_url_chooser_cls: type[ScihubUrlChooser] = default_chooser_cls,
+        out: Path | None = None,
+        proxies: dict[str, str] | None = None,
+    ) -> None:
         super().__init__()
         self.source_keyword = source_keyword
         self.scihub_url_chooser_cls = scihub_url_chooser_cls
@@ -49,8 +53,8 @@ class ScihubTask(BaseTask):
         self.source_class = source_classes.get(source_type, DoiSource)
         self.out = out
         self.proxies = proxies or {}
-        self.context['status'] = 'initialized'
-        self.context['proxies'] = self.proxies
+        self.context["status"] = "initialized"
+        self.context["proxies"] = self.proxies
         self.service = ScihubUrlService()
         self.updater = CrawlingScihubDomainUpdater()
 
@@ -69,9 +73,13 @@ class ScihubTask(BaseTask):
                 logger.info(f"Choose scihub url [{i}]: {scihub_url.url}")
                 return self._run(scihub_url.url)
             except Exception:
-                logger.warning(f"Error occurs, task status: {self.context['status']}, error: {self.context['error']}")
+                logger.warning(
+                    f"Error occurs, task status: {self.context['status']}, error: {self.context['error']}"
+                )
                 continue
-        logger.error(f"Failed to download the paper: {self.source_keyword}. Please try again.")
+        logger.error(
+            f"Failed to download the paper: {self.source_keyword}. Please try again."
+        )
 
     def _run(self, scihub_url: str) -> None:
         source = self.source_class(self.source_keyword)
@@ -83,20 +91,20 @@ class ScihubTask(BaseTask):
 
         if self.out is None:
             # Using title as the filename and save to current directory.
-            self.out = Path(pdf_url_title_info['title'] + '.pdf')
+            self.out = Path(pdf_url_title_info["title"] + ".pdf")
         else:
             dirpath = self.out.parent
             filename = self.out.name
             if not dirpath.exists():
                 dirpath.mkdir(parents=True, exist_ok=True)
             if len(filename) == 0:
-                filename = pdf_url_title_info.get_title() + '.pdf'
+                filename = pdf_url_title_info.get_title() + ".pdf"
             if not (filename.endswith("pdf") or filename.endswith("PDF")):
-                filename += '.pdf'
+                filename += ".pdf"
             self.out = dirpath / filename
 
         downloader = UrlDownloader(pdf_url_title_info, self)
         downloader.download(self.out)
-        referer_url = self.context.get('referer', None)
+        referer_url = self.context.get("referer", None)
         referer_url = referer_url if isinstance(referer_url, str) else None
         self.service.increment_success_times(referer_url)

@@ -21,17 +21,19 @@ class LoggerLoader:
     def _log_init(self) -> dict[str, Any]:
         """Initialize loggings."""
         # Load log configs
-        log_level = configs['log']['console_log_level']
-        log_format = configs['log']['console_log_format']
+        log_level = configs["log"]["console_log_level"]
+        log_format = configs["log"]["console_log_format"]
 
         logger.remove()
         loggers: dict[str, Any] = {}
         # Add default logger
-        default_logger_name = 'default'
-        logger.add(sys.stderr,
-                   level=log_level,
-                   filter=self._make_filter(name=default_logger_name),
-                   format=log_format)
+        default_logger_name = "default"
+        logger.add(
+            sys.stderr,
+            level=log_level,
+            filter=self._make_filter(name=default_logger_name),
+            format=log_format,
+        )
         default_logger = logger.bind(name=default_logger_name)
         loggers[default_logger_name] = default_logger
         default_logger.debug("Registered the default logger")
@@ -40,9 +42,12 @@ class LoggerLoader:
     @staticmethod
     def _make_filter(name: str) -> Callable[[Any], bool]:
         def f(record: Any) -> bool:
-            record_dict = cast(dict[str, Any], record) if isinstance(record, dict) else {}
+            record_dict = (
+                cast(dict[str, Any], record) if isinstance(record, dict) else {}
+            )
             extra = cast(dict[str, Any], record_dict.get("extra", {}))
             return bool(extra.get("name") == name)
+
         return f
 
     @staticmethod
@@ -61,5 +66,5 @@ class LoggerLoader:
 
 
 def get_logger(name: str | None = None) -> Any:
-    name = name or 'default'
+    name = name or "default"
     return LoggerLoader.load(name)

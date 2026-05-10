@@ -19,9 +19,9 @@ class DoiSource(BaseSource):
         super().__init__()
         self.doi = self._clean_doi(doi)
         self.protocol = self._extract_protocol(doi)
-        self.type = 'doi'
+        self.type = "doi"
         self[self.type] = self.doi
-        self['protocol'] = self.protocol
+        self["protocol"] = self.protocol
 
     @staticmethod
     def _clean_doi(doi: Any) -> str:
@@ -58,21 +58,27 @@ class DoiSource(BaseSource):
 
 class PmidSource(BaseSource):
     """A PMID source dict."""
+
     pmid: str
 
     def __init__(self, pmid: Any) -> None:
         super().__init__()
         self.pmid = self._clean_pmid(pmid)
-        self.type = 'pmid'
+        self.type = "pmid"
         self[self.type] = self.pmid
 
     @staticmethod
     def _clean_pmid(pmid: Any) -> str:
         if pmid is None:
             raise EmptyPmidException("Empty pmid is given")
-        if not isinstance(pmid, str) and not isinstance(pmid, int) \
-                or isinstance(pmid, bool):
-            raise TypeError(f"PMID must be either a string or an integer, got a {type(pmid)} instead")
+        if (
+            not isinstance(pmid, str)
+            and not isinstance(pmid, int)
+            or isinstance(pmid, bool)
+        ):
+            raise TypeError(
+                f"PMID must be either a string or an integer, got a {type(pmid)} instead"
+            )
 
         pmid_str = str(pmid)
         if len(pmid_str) == 0:
@@ -88,12 +94,13 @@ class PmidSource(BaseSource):
 
 class TitleSource(BaseSource):
     """A title source dict."""
+
     title: str
 
     def __init__(self, title: Any) -> None:
         super().__init__()
         self.title = self._clean_title(title)
-        self.type = 'title'
+        self.type = "title"
         self[self.type] = self.title
 
     @staticmethod
@@ -101,7 +108,9 @@ class TitleSource(BaseSource):
         if title is None:
             raise EmptyTitleException("Empty title is given")
         if not isinstance(title, str):
-            raise TypeError(f"Title must be either a string or an integer, got a {type(title)} instead")
+            raise TypeError(
+                f"Title must be either a string or an integer, got a {type(title)} instead"
+            )
 
         title_str = str(title).strip()
         if len(title_str) == 0:
@@ -116,10 +125,10 @@ class TitleSource(BaseSource):
 
 
 source_classes: dict[str, Callable[[Any], BaseSource]] = {
-    'doi': DoiSource,
-    'DOI': DoiSource,
-    'pmid': PmidSource,
-    'PMID': PmidSource,
-    'title': TitleSource,
-    'TITLE': TitleSource
+    "doi": DoiSource,
+    "DOI": DoiSource,
+    "pmid": PmidSource,
+    "PMID": PmidSource,
+    "title": TitleSource,
+    "TITLE": TitleSource,
 }

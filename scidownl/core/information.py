@@ -6,6 +6,7 @@ from .base import BaseInformation
 
 class UrlInformation(BaseInformation):
     """Information of url"""
+
     PROTOCOL_PREFIXES: list[str] = ["https://", "http://"]
     DEFAULT_PROTOCOL_PREFIX: str = PROTOCOL_PREFIXES[0]
     url: str
@@ -13,7 +14,7 @@ class UrlInformation(BaseInformation):
     def __init__(self, url: str) -> None:
         BaseInformation.__init__(self)
         self.url = url
-        self['url'] = self.url
+        self["url"] = self.url
 
     def get_url(self) -> str:
         return self.url
@@ -21,12 +22,13 @@ class UrlInformation(BaseInformation):
 
 class TitleInformation(BaseInformation):
     """Information of title"""
+
     title: str
 
     def __init__(self, title: str) -> None:
         BaseInformation.__init__(self)
         self.title = title
-        self['title'] = self.title
+        self["title"] = self.title
 
     def get_title(self) -> str:
         return self.title

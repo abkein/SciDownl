@@ -10,7 +10,7 @@ class GlobalConfig(object):
     _lock: RLock = RLock()
     _config: ConfigParser | None = None
     package_dir: Path = Path(__file__).parent
-    config_fpath: Path = (package_dir / 'config/global.ini').resolve()
+    config_fpath: Path = (package_dir / "config/global.ini").resolve()
 
     def _config_init(self) -> ConfigParser:
         # Check if config file exists.

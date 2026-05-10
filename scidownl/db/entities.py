@@ -22,9 +22,9 @@ def get_engine(echo: bool = False, test: bool = False) -> Engine:
     :returns :class:`sqlalchemy._engine.Engine` instance.
     """
     par_dirpath = Path(__file__).resolve().parent.parent
-    dbname = 'test-scidownl.db' if test else configs['global_db']['db_name']
+    dbname = "test-scidownl.db" if test else configs["global_db"]["db_name"]
     db_path = par_dirpath / dbname
-    engine = create_engine(f'sqlite:///{db_path}?check_same_thread=False', echo=echo)
+    engine = create_engine(f"sqlite:///{db_path}?check_same_thread=False", echo=echo)
     return engine
 
 
@@ -54,6 +54,8 @@ class ScihubUrl(Base):  # type: ignore[misc]
         self.failed_times = failed_times
 
     def __repr__(self) -> str:
-        return f"<ScihubUrl(url={self.url}, " \
-               f"success_times={self.success_times}, " \
-               f"failed_times={self.failed_times})>"
+        return (
+            f"<ScihubUrl(url={self.url}, "
+            f"success_times={self.success_times}, "
+            f"failed_times={self.failed_times})>"
+        )

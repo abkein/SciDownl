@@ -13,6 +13,7 @@ class SimpleScihubUrlChooser(ScihubUrlChooser):
     """Simple chooser of scihub urls, which would choose
     scihub urls based on the order in the database table.
     """
+
     __chooser_type__: str = "simple"
     service: ScihubUrlService
     scihub_urls: list[ScihubUrl]
@@ -41,6 +42,7 @@ class RandomScihubUrlChooser(ScihubUrlChooser):
     """Random chooser of scihub urls, which would choose
     scihub urls randomly, and one url won't be chosen twice.
     """
+
     __chooser_type__: str = "random"
     service: ScihubUrlService
     scihub_urls: list[ScihubUrl]
@@ -76,6 +78,7 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
         failed_rate = (failed_times) / (success_times + failed_times + 0.01)
     The tail 0.01 is used to avoid divide by zero error if (success_times + failed_times) == 0.
     """
+
     __chooser_type__: str = "availability_first"
     service: ScihubUrlService
     scihub_urls: list[ScihubUrl]
@@ -90,7 +93,8 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
         # Sort by availability.
         self.temp_zone = sorted(
             self.scihub_urls,
-            key=lambda url: url.failed_times / (url.success_times + url.failed_times + 0.01)
+            key=lambda url: url.failed_times
+            / (url.success_times + url.failed_times + 0.01),
         )
 
         self.cursor = 0
@@ -111,5 +115,5 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
 scihub_url_choosers: dict[str, type[ScihubUrlChooser]] = {
     "simple": SimpleScihubUrlChooser,
     "random": RandomScihubUrlChooser,
-    "availability_first": AvailabilityFirstScihubUrlChooser
+    "availability_first": AvailabilityFirstScihubUrlChooser,
 }

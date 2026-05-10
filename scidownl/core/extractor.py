@@ -9,7 +9,11 @@ from .base import BaseExtractor, BaseTask, BaseTaskStep
 from .content import HtmlContent
 from .information import PdfUrlTitleInformation, UrlInformation
 from .chooser import scihub_url_choosers, AvailabilityFirstScihubUrlChooser
-from ..exception import PdfTagNotFoundException, PdfUrlNotFoundException, ExtractException
+from ..exception import (
+    PdfTagNotFoundException,
+    PdfUrlNotFoundException,
+    ExtractException,
+)
 from ..db.service import ScihubUrlService
 from ..log import get_logger
 from ..config import get_config
@@ -19,16 +23,17 @@ configs = get_config()
 
 
 def get_default_referer() -> str:
-    scihub_url_chooser_type = configs['scihub.task']['scihub_url_chooser_type']
-    chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser)
+    scihub_url_chooser_type = configs["scihub.task"]["scihub_url_chooser_type"]
+    chooser_cls = scihub_url_choosers.get(
+        scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser
+    )
     chooser = chooser_cls()
     selected_url = chooser.next() if len(chooser) > 0 else None
     return "https://sci-hub.se" if selected_url is None else selected_url.url
 
 
 class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
-    """Pdf extractor to extract a pdf information from the html content.
-    """
+    """Pdf extractor to extract a pdf information from the html content."""
 
     # choose the first scihub url with the chooser defined in config.
     DEFAULT_REFERER: str = get_default_referer()
@@ -44,12 +49,12 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
         self.service = ScihubUrlService()
 
         if self.task is not None:
-            self.task.context['status'] = 'extracting'
+            self.task.context["status"] = "extracting"
 
         # using pdf_tag_selector, pdf_tag_attr in configs.
-        self.pdf_tag_selector = configs['scihub.task.extractor']['pdf_tag_selector']
-        self.pdf_tag_attr = configs['scihub.task.extractor']['pdf_tag_attr']
-        self._parser = 'html.parser'
+        self.pdf_tag_selector = configs["scihub.task.extractor"]["pdf_tag_selector"]
+        self.pdf_tag_attr = configs["scihub.task.extractor"]["pdf_tag_attr"]
+        self._parser = "html.parser"
 
     def extract(self) -> PdfUrlTitleInformation:
         try:
@@ -59,12 +64,12 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
             info = PdfUrlTitleInformation(url, title)
             logger.info(f"* Extracted information: {info}")
             if self.task is not None:
-                self.task.context['info'] = info
+                self.task.context["info"] = info
         except Exception as e:
             if self.task is not None:
-                self.task.context['status'] = 'extracting_failed'
-                self.task.context['error'] = e
-                scihub_url = self.task.context.get('referer', None)
+                self.task.context["status"] = "extracting_failed"
+                self.task.context["error"] = e
+                scihub_url = self.task.context.get("referer", None)
                 scihub_url = scihub_url if isinstance(scihub_url, str) else None
                 self.service.increment_failed_times(scihub_url)
             raise ExtractException(f"Error occurs when extracting: {e}")
@@ -85,8 +90,14 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
             if self.task is None:
                 referer = HtmlPdfExtractor.DEFAULT_REFERER
             else:
-                referer_value = self.task.context.get('referer', HtmlPdfExtractor.DEFAULT_REFERER)
-                referer = referer_value if isinstance(referer_value, str) else HtmlPdfExtractor.DEFAULT_REFERER
+                referer_value = self.task.context.get(
+                    "referer", HtmlPdfExtractor.DEFAULT_REFERER
+                )
+                referer = (
+                    referer_value
+                    if isinstance(referer_value, str)
+                    else HtmlPdfExtractor.DEFAULT_REFERER
+                )
             url = referer + url
         return url
 
@@ -95,23 +106,30 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
         soup = BeautifulSoup(self.content.content, self._parser)
         pdf_tag = soup.select_one(self.pdf_tag_selector)
         if pdf_tag is None:
-            raise PdfTagNotFoundException(f"No pdf tag was found in the given content "
-                                          f"with the selector: {self.pdf_tag_selector}")
+            raise PdfTagNotFoundException(
+                f"No pdf tag was found in the given content "
+                f"with the selector: {self.pdf_tag_selector}"
+            )
         raw_url = pdf_tag.attrs.get(self.pdf_tag_attr)
         if not isinstance(raw_url, str):
-            raise PdfUrlNotFoundException(f"No pdf url was found in the pdf tag: {pdf_tag.get_text()} "
-                                          f"with the attr {self.pdf_tag_attr}")
+            raise PdfUrlNotFoundException(
+                f"No pdf url was found in the pdf tag: {pdf_tag.get_text()} "
+                f"with the attr {self.pdf_tag_attr}"
+            )
         return raw_url
 
     def _extract_title(self) -> str:
         """Extract title from html content."""
         soup = BeautifulSoup(self.content.content, self._parser)
         soup_title = soup.title
-        if soup_title is None or len(soup_title.text) == 0 \
-                or '|' not in soup_title.text:
+        if (
+            soup_title is None
+            or len(soup_title.text) == 0
+            or "|" not in soup_title.text
+        ):
             title = ""
         else:
-            title = soup_title.text.split('|')[1]
+            title = soup_title.text.split("|")[1]
         return self._clean_title(title)
 
     @staticmethod

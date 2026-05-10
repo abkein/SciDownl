@@ -11,6 +11,7 @@ from ..db.entities import ScihubUrl
 
 class BaseTask(ABC):
     """Abstract task with a `run` method."""
+
     context: dict[str, Any]
 
     def __init__(self) -> None:
@@ -26,6 +27,7 @@ class BaseTaskStep(ABC):
     """Abstract task step if a task.
     Every task step can access the task context.
     """
+
     task: BaseTask | None
 
     def __init__(self, task: BaseTask | None) -> None:
@@ -33,30 +35,31 @@ class BaseTaskStep(ABC):
 
 
 class BaseSource(ABC, dict[str, str]):
-    """Abstract source, which is a map that contains source item entries.
-    """
+    """Abstract source, which is a map that contains source item entries."""
+
     type: str
 
     def __init__(self) -> None:
         super().__init__()
-        self.type = 'base'
+        self.type = "base"
 
 
 class BaseContent(ABC):
-    """Abstract content.
-    """
+    """Abstract content."""
+
     content: Any
     type: str
 
     def __init__(self, content: Any | None = None) -> None:
         self.content = "" if content is None else content
-        self.type = 'base'
+        self.type = "base"
 
 
 class BaseCrawler(ABC):
     """Abstract crawler with a `crawl` method.
     Crawler is used to output the Content with the given Source.
     """
+
     source: BaseSource
 
     def __init__(self, source: BaseSource) -> None:
@@ -76,6 +79,7 @@ class BaseChecker(ABC):
     """Abstract checker with a `check` method.
     Checker is used to check the validity of Content.
     """
+
     content: BaseContent
 
     def __init__(self, content: BaseContent) -> None:
@@ -88,19 +92,20 @@ class BaseChecker(ABC):
 
 
 class BaseInformation(ABC, dict[str, str]):
-    """Abstract information, which is a map that contains information item entries.
-    """
+    """Abstract information, which is a map that contains information item entries."""
+
     type: str
 
     def __init__(self) -> None:
         super().__init__()
-        self.type = 'base'
+        self.type = "base"
 
 
 class BaseExtractor(ABC):
     """Abstract extractor with an `extract` method.
     Extractor is used to extract information from the Content.
     """
+
     content: BaseContent
 
     def __init__(self, content: BaseContent) -> None:
@@ -114,6 +119,7 @@ class BaseExtractor(ABC):
 
 class BaseDownloader(ABC):
     """Abstract downloader with a `download` method."""
+
     information: BaseInformation
 
     def __init__(self, information: BaseInformation) -> None:
