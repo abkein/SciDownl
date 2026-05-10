@@ -54,7 +54,6 @@
             retrying
 
             beautifulsoup4
-            click
             loguru
             pysocks
             sqlalchemy
