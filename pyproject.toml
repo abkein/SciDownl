@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scidownl"
-version = "1.0.2"
+version = "1.1.0"
 description = "Download pdfs from Scihub."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,8 +34,9 @@ classifiers = [
 cffi = ["curl_cffi>=0.5.0"]
 
 [project.urls]
-Homepage = "https://github.com/Tishacy/SciDownl"
-Repository = "https://github.com/Tishacy/SciDownl"
+Homepage = "https://github.com/abkein/SciDownl"
+Repository = "https://github.com/abkein/SciDownl"
+"Bug Tracker" = "https://github.com/abkein/SciDownl/issues"
 
 [project.scripts]
 scidownl = "scidownl.api.cli:cli"

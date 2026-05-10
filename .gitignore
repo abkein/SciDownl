@@ -30,4 +30,6 @@ playground.*
 
 .direnv
 .mypy_cache
+.ruff_cache
+.pytest_cache
 AGENTS.md
