@@ -75,6 +75,7 @@
             # flake8-length
             black
             autopep8
+            ruff
           ]
         );
       in
@@ -164,7 +165,8 @@
             pkgs.mkShell {
               buildInputs = with pkgs; [
                 jq
-
+                pyright
+                
                 # not needed yet
                 # texlive.combined.scheme-full
                 # pkg-config

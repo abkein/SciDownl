@@ -11,6 +11,7 @@ requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
   { name = "Tishacy", email = "Tishacy@gmail.com" },
+  { name = "AbKein", email = "rickbatra0@gmail.com" },
 ]
 dependencies = [
   "beautifulsoup4>=4.10.0",
@@ -45,3 +46,7 @@ exclude = ["test", "test.*", "example", "example.*"]
 
 [tool.setuptools.package-data]
 scidownl = ["config/*.ini"]
+
+[tool.pyright]
+include = ["scidownl", "test"]
+typeCheckingMode = "standard"
