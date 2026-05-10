@@ -7,7 +7,6 @@ logger = get_logger()
 
 
 class TestConfig(unittest.TestCase):
-
     def test_config_ops(self) -> None:
         config = get_config()
         logger.debug(config.sections())

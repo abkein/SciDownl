@@ -9,7 +9,6 @@ from scidownl.exception import (
 
 
 class TestSource(unittest.TestCase):
-
     def test_create_doi_source(self) -> None:
         # Empty case: doi is None.
         with self.assertRaises(EmptyDoiException):

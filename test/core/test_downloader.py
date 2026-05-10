@@ -30,7 +30,6 @@ logger = get_logger()
 
 
 class TestDownloader(unittest.TestCase):
-
     def test_download_information(self) -> None:
         try:
             sess = requests.Session()

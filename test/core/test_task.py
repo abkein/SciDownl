@@ -11,7 +11,6 @@ configs = get_config()
 
 
 class TestTask(unittest.TestCase):
-
     def test_run_tasks(self) -> None:
         self.skipTest("Just")
         tmp_paper_dir = Path("./.tmp_paper/")

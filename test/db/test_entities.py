@@ -10,7 +10,6 @@ logger = get_logger()
 
 
 class TestEntities(unittest.TestCase):
-
     def test_create_tables(self) -> None:
         create_tables(test=True)
 

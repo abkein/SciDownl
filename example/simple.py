@@ -22,15 +22,15 @@ def download_multi_papers() -> None:
     and their filenames are the paper titles.
     """
     source = [
-        ("https://doi.org/10.1145/3375633", 'doi', "./paper/"),
-        ("31395057", 'pmid', "./paper/"),
-        ("24686414", 'pmid', "./paper/"),
-        ("Aggregated Residual Transformations for Deep Neural Networks", 'title', "./paper/"),
+        ("https://doi.org/10.1145/3375633", "doi", "./paper/"),
+        ("31395057", "pmid", "./paper/"),
+        ("24686414", "pmid", "./paper/"),
+        ("Aggregated Residual Transformations for Deep Neural Networks", "title", "./paper/"),
     ]
     for paper, paper_type, out in source:
         scihub_download(paper, paper_type=paper_type, out=Path(out))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     download_one_paper()
     download_multi_papers()

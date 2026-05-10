@@ -52,6 +52,9 @@ scidownl = ["config/*.ini"]
 include = ["scidownl"]
 typeCheckingMode = "strict"
 
+[tool.ruff]
+line-length = 320
+
 [tool.mypy]
 strict = true
 files = ["scidownl"]

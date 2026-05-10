@@ -101,7 +101,7 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
                     # Re-fetch the page after solving captcha
                     res = self._fetch(proxies)
                     html_text = res.content.decode()
-                    logger.info(f"-> Post-captcha response: status_code={res.status_code}, " f"content_length={len(html_text)}")
+                    logger.info(f"-> Post-captcha response: status_code={res.status_code}, content_length={len(html_text)}")
                     if is_captcha_page(html_text):
                         raise RuntimeError("Still getting captcha after solving it")
                 else:

@@ -5,7 +5,6 @@ from scidownl.core.extractor import HtmlPdfExtractor
 
 
 class TestExtractor(unittest.TestCase):
-
     def test_html_pdf_extractor(self) -> None:
         html_content = HtmlContent(
             """
@@ -28,7 +27,7 @@ class TestExtractor(unittest.TestCase):
             pdf_url_title_info.get_url(),
         )
         self.assertEqual(
-            "Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. " "Advances in Protein Chemistry and Structural Biology, 217–247",
+            "Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. Advances in Protein Chemistry and Structural Biology, 217–247",
             pdf_url_title_info.get_title(),
         )
 

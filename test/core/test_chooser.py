@@ -8,7 +8,6 @@ from scidownl.core.chooser import (
 
 
 class TestChooser(unittest.TestCase):
-
     def test_simple_chooser(self) -> None:
         chooser = SimpleScihubUrlChooser()
         self.assertGreaterEqual(len(chooser), 0)

@@ -4,7 +4,6 @@ from scidownl.core.updater import CrawlingScihubDomainUpdater, SearchScihubDomai
 
 
 class TestDomainUpdater(unittest.TestCase):
-
     def test_crawling_scihub_domain_updater_exclude_method(self) -> None:
         domain_urls = [
             "http://sci-hub.se",

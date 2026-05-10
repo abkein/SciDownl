@@ -47,7 +47,7 @@ def update_domains(mode: str) -> None:
 
     updater_cls = scihub_domain_updaters.get(mode, None)
     if updater_cls is None:
-        logger.error(f"Update mode (-m) must be one of " f"{list(scihub_domain_updaters.keys())}, got " f"'{mode}' instead.")
+        logger.error(f"Update mode (-m) must be one of {list(scihub_domain_updaters.keys())}, got '{mode}' instead.")
         return
     updater = updater_cls()
     updater.update_domains()
@@ -283,7 +283,7 @@ def build_parser() -> argparse.ArgumentParser:
     download_parser.add_argument(
         "-u",
         "--scihub-url",
-        help="Scihub domain url. If not specified, automatically choose one from local saved domains. " "It's recommended to leave this option empty.",
+        help="Scihub domain url. If not specified, automatically choose one from local saved domains. It's recommended to leave this option empty.",
     )
     download_parser.add_argument(
         "-x",
