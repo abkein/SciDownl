@@ -56,7 +56,6 @@
             beautifulsoup4
             loguru
             pysocks
-            sqlalchemy
             wget
             setuptools
             curl-cffi

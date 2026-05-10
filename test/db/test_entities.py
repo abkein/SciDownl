@@ -1,68 +1,33 @@
+import json
 import unittest
 
-from sqlalchemy.orm import sessionmaker, Session
-
-from scidownl.db.entities import get_engine, create_tables, ScihubUrl
-from scidownl.log import get_logger
-
-
-logger = get_logger()
+from scidownl.db.entities import ScihubUrl, create_storage, get_storage_path
 
 
 class TestEntities(unittest.TestCase):
-    def test_create_tables(self) -> None:
-        create_tables(test=True)
+    def setUp(self) -> None:
+        storage_path = get_storage_path(test=True)
+        if storage_path.exists():
+            storage_path.unlink()
 
-    def test_orm(self) -> None:
+    def tearDown(self) -> None:
+        storage_path = get_storage_path(test=True)
+        if storage_path.exists():
+            storage_path.unlink()
 
-        create_tables(test=True)
-        engine = get_engine(echo=False, test=True)
-        SessionCls: sessionmaker[Session] = sessionmaker(bind=engine)
+    def test_create_storage(self) -> None:
+        create_storage(test=True)
 
-        # Add
-        items = [
-            ScihubUrl(url="http://sci-hub.se"),
-            ScihubUrl(url="https://sci-hub.sd"),
-        ]
-        session = SessionCls()
-        for item in items:
-            try:
-                session.add(item)
-                session.commit()
-            except Exception:
-                session.rollback()
-        session.close()
+        storage_path = get_storage_path(test=True)
+        self.assertTrue(storage_path.is_file())
+        self.assertEqual({"scihub_urls": []}, json.loads(storage_path.read_text(encoding="utf-8")))
 
-        # Query
-        exist_url = ScihubUrl(url="http://sci-hub.se")
-        non_exist_url = ScihubUrl(url="http://sci-hub.non-exist")
-        session = SessionCls()
-        exist_rec = session.query(ScihubUrl).filter_by(url=exist_url.url).first()
-        assert exist_rec is not None
-        self.assertEqual(exist_url.url, exist_rec.url)
-        non_exist_rec = session.query(ScihubUrl).filter_by(url=non_exist_url.url).first()
-        self.assertIsNone(non_exist_rec)
-        session.close()
+    def test_scihub_url_json_round_trip(self) -> None:
+        item = ScihubUrl(url="http://sci-hub.se", success_times=2, failed_times=1)
 
-        # Modify
-        modify_url = ScihubUrl(url="http://sci-hub.se")
-        session = SessionCls()
-        session.query(ScihubUrl).filter_by(url=modify_url.url).update({ScihubUrl.success_times: ScihubUrl.success_times + 1})
-        session.commit()
-        modified_rec = session.query(ScihubUrl).filter_by(url=modify_url.url).first()
-        assert modified_rec is not None
-        modified_success_times = modified_rec.success_times
-        self.assertGreaterEqual(modified_success_times, 1)
-        session.close()
+        restored_item = ScihubUrl.from_dict(item.to_dict())
 
-        # Delete
-        session = SessionCls()
-        urls = session.query(ScihubUrl).all()
-        for url in urls:
-            session.delete(url)
-        session.commit()
-        self.assertEqual(0, len(session.query(ScihubUrl).all()))
-        session.close()
+        self.assertEqual(item, restored_item)
 
 
 if __name__ == "__main__":

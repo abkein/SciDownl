@@ -1,57 +1,64 @@
 # -*- coding: utf-8 -*-
-"""Entities of tables"""
+"""JSON-backed storage entities."""
 
+from __future__ import annotations
+
+import json
+from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
-
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import declarative_base
 
 from ..config import get_config
 
-Base: Any = declarative_base()
 configs = get_config()
 
 
-def get_engine(echo: bool = False, test: bool = False) -> Engine:
-    """Returns the db engine.
-
-    :param echo: if True, the Engine will log all statements.
-    :param test: if True, using test db instead.
-    :returns :class:`sqlalchemy._engine.Engine` instance.
-    """
-    par_dirpath = Path(__file__).resolve().parent.parent
-    dbname = "test-scidownl.db" if test else configs["global_db"]["db_name"]
-    db_path = par_dirpath / dbname
-    engine = create_engine(f"sqlite:///{db_path}?check_same_thread=False", echo=echo)
-    return engine
-
-
-def create_tables(test: bool = False) -> None:
-    """Create all tables that are not exist.
-
-    :param test: if True, using test db instead.
-    """
-    engine = get_engine(test=test)
-    Base.metadata.create_all(engine, checkfirst=True)
-
-
-class ScihubUrl(Base):  # type: ignore[misc]
+@dataclass(slots=True)
+class ScihubUrl:
     url: str
-    success_times: int
-    failed_times: int
+    success_times: int = 0
+    failed_times: int = 0
 
-    __tablename__: str = "scihub_url"
+    def to_dict(self) -> dict[str, str | int]:
+        return {
+            "url": self.url,
+            "success_times": self.success_times,
+            "failed_times": self.failed_times,
+        }
 
-    url = cast(str, Column(String(50), primary_key=True))
-    success_times = cast(int, Column(Integer, default=0))
-    failed_times = cast(int, Column(Integer, default=0))
+    @classmethod
+    def from_dict(cls, data: Mapping[str, object]) -> ScihubUrl:
+        url = data.get("url")
+        success_times = data.get("success_times", 0)
+        failed_times = data.get("failed_times", 0)
 
-    def __init__(self, url: str, success_times: int = 0, failed_times: int = 0) -> None:
-        self.url = url
-        self.success_times = success_times
-        self.failed_times = failed_times
+        if not isinstance(url, str):
+            raise ValueError("ScihubUrl JSON record must contain a string 'url'.")
+        if not isinstance(success_times, int):
+            raise ValueError("ScihubUrl JSON record 'success_times' must be an integer.")
+        if not isinstance(failed_times, int):
+            raise ValueError("ScihubUrl JSON record 'failed_times' must be an integer.")
+        return cls(url=url, success_times=success_times, failed_times=failed_times)
 
     def __repr__(self) -> str:
         return f"<ScihubUrl(url={self.url}, success_times={self.success_times}, failed_times={self.failed_times})>"
+
+
+def get_storage_path(test: bool = False) -> Path:
+    """Returns the JSON storage path."""
+    par_dirpath = Path(__file__).resolve().parent.parent
+    filename = "test-scidownl.json" if test else configs["global_db"]["db_name"]
+    return par_dirpath / filename
+
+
+def create_storage(test: bool = False) -> None:
+    """Create the JSON storage file if it does not exist."""
+    storage_path = get_storage_path(test=test)
+    if storage_path.exists():
+        return
+    storage_path.write_text(json.dumps({"scihub_urls": []}, indent=2) + "\n", encoding="utf-8")
+
+
+def create_tables(test: bool = False) -> None:
+    """Compatibility wrapper for the old storage initialization API."""
+    create_storage(test=test)

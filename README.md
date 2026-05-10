@@ -110,7 +110,7 @@ There are 2 update modes that you could specify with an option: `-m` or `--mode`
 
 ### 2. List all saved SciHub domains
 
-SciDownl use [SQLite](https://www.sqlite.org/) as the local database to store all updated SciHub domains locally. You can list all saved SciHub domains with the command `domain.list`.
+SciDownl uses a local JSON file to store all updated SciHub domains locally. You can list all saved SciHub domains with the command `domain.list`.
 
 ```bash
 $ scidownl domain.list

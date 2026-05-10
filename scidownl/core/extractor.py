@@ -21,6 +21,7 @@ from ..config import get_config
 
 logger = get_logger()
 configs = get_config()
+FALLBACK_REFERER = "https://sci-hub.se"
 
 
 def get_default_referer() -> str:
@@ -28,14 +29,14 @@ def get_default_referer() -> str:
     chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser)
     chooser = chooser_cls()
     selected_url = chooser.next() if len(chooser) > 0 else None
-    return "https://sci-hub.se" if selected_url is None else selected_url.url
+    return FALLBACK_REFERER if selected_url is None else selected_url.url
 
 
 class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
     """Pdf extractor to extract a pdf information from the html content."""
 
     # choose the first scihub url with the chooser defined in config.
-    DEFAULT_REFERER: str = get_default_referer()
+    DEFAULT_REFERER: str = FALLBACK_REFERER
     service: ScihubUrlService
     pdf_tag_selector: str
     pdf_tag_attr: str
@@ -97,11 +98,12 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
         if url.startswith("//"):
             url = UrlInformation.DEFAULT_PROTOCOL_PREFIX + url[2:]
         elif url.startswith("/"):
+            fallback_referer = get_default_referer()
             if self.task is None:
-                referer = HtmlPdfExtractor.DEFAULT_REFERER
+                referer = fallback_referer
             else:
-                referer_value = self.task.context.get("referer", HtmlPdfExtractor.DEFAULT_REFERER)
-                referer = referer_value if isinstance(referer_value, str) else HtmlPdfExtractor.DEFAULT_REFERER
+                referer_value = self.task.context.get("referer", fallback_referer)
+                referer = referer_value if isinstance(referer_value, str) else fallback_referer
             url = referer + url
         return url
 
@@ -117,7 +119,7 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
             raise CaptchaException("Sci-Hub returned a captcha page. Try again later or use a different domain.")
 
         # Try primary selector from config first
-        pdf_tag = soup.select_one(self.pdf_tag_selector)
+        pdf_tag = soup.select_one(self.pdf_tag_selector)  # pyright: ignore[reportUnknownMemberType]
         if pdf_tag is not None:
             raw_url = pdf_tag.attrs.get(self.pdf_tag_attr)
             if (raw_url is not None) and isinstance(raw_url, str):
@@ -125,7 +127,7 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
 
         # Try fallback selectors
         for selector, attr in self.FALLBACK_SELECTORS:
-            tag = soup.select_one(selector)
+            tag = soup.select_one(selector)  # pyright: ignore[reportUnknownMemberType]
             if tag is not None:
                 url = tag.attrs.get(attr)
                 if (url is not None) and isinstance(url, str):
