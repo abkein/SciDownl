@@ -42,9 +42,7 @@ class LoggerLoader:
     @staticmethod
     def _make_filter(name: str) -> Callable[[Any], bool]:
         def f(record: Any) -> bool:
-            record_dict = (
-                cast(dict[str, Any], record) if isinstance(record, dict) else {}
-            )
+            record_dict = cast(dict[str, Any], record) if isinstance(record, dict) else {}
             extra = cast(dict[str, Any], record_dict.get("extra", {}))
             return bool(extra.get("name") == name)
 

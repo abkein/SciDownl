@@ -93,8 +93,7 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
         # Sort by availability.
         self.temp_zone = sorted(
             self.scihub_urls,
-            key=lambda url: url.failed_times
-            / (url.success_times + url.failed_times + 0.01),
+            key=lambda url: url.failed_times / (url.success_times + url.failed_times + 0.01),
         )
 
         self.cursor = 0

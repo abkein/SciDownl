@@ -24,9 +24,7 @@ configs = get_config()
 
 def get_default_referer() -> str:
     scihub_url_chooser_type = configs["scihub.task"]["scihub_url_chooser_type"]
-    chooser_cls = scihub_url_choosers.get(
-        scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser
-    )
+    chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser)
     chooser = chooser_cls()
     selected_url = chooser.next() if len(chooser) > 0 else None
     return "https://sci-hub.se" if selected_url is None else selected_url.url
@@ -90,14 +88,8 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
             if self.task is None:
                 referer = HtmlPdfExtractor.DEFAULT_REFERER
             else:
-                referer_value = self.task.context.get(
-                    "referer", HtmlPdfExtractor.DEFAULT_REFERER
-                )
-                referer = (
-                    referer_value
-                    if isinstance(referer_value, str)
-                    else HtmlPdfExtractor.DEFAULT_REFERER
-                )
+                referer_value = self.task.context.get("referer", HtmlPdfExtractor.DEFAULT_REFERER)
+                referer = referer_value if isinstance(referer_value, str) else HtmlPdfExtractor.DEFAULT_REFERER
             url = referer + url
         return url
 
@@ -106,27 +98,17 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
         soup = BeautifulSoup(self.content.content, self._parser)
         pdf_tag = soup.select_one(self.pdf_tag_selector)
         if pdf_tag is None:
-            raise PdfTagNotFoundException(
-                f"No pdf tag was found in the given content "
-                f"with the selector: {self.pdf_tag_selector}"
-            )
+            raise PdfTagNotFoundException(f"No pdf tag was found in the given content " f"with the selector: {self.pdf_tag_selector}")
         raw_url = pdf_tag.attrs.get(self.pdf_tag_attr)
         if not isinstance(raw_url, str):
-            raise PdfUrlNotFoundException(
-                f"No pdf url was found in the pdf tag: {pdf_tag.get_text()} "
-                f"with the attr {self.pdf_tag_attr}"
-            )
+            raise PdfUrlNotFoundException(f"No pdf url was found in the pdf tag: {pdf_tag.get_text()} " f"with the attr {self.pdf_tag_attr}")
         return raw_url
 
     def _extract_title(self) -> str:
         """Extract title from html content."""
         soup = BeautifulSoup(self.content.content, self._parser)
         soup_title = soup.title
-        if (
-            soup_title is None
-            or len(soup_title.text) == 0
-            or "|" not in soup_title.text
-        ):
+        if soup_title is None or len(soup_title.text) == 0 or "|" not in soup_title.text:
             title = ""
         else:
             title = soup_title.text.split("|")[1]

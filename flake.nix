@@ -61,6 +61,7 @@
             tablib
             wget
             setuptools
+            curl-cffi
 
             # type checking
             types-requests

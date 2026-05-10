@@ -20,9 +20,7 @@ logger = get_logger()
 configs = get_config()
 
 scihub_url_chooser_type = configs["scihub.task"]["scihub_url_chooser_type"]
-default_chooser_cls = scihub_url_choosers.get(
-    scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser
-)
+default_chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser)
 
 
 class ScihubTask(BaseTask):
@@ -77,13 +75,9 @@ class ScihubTask(BaseTask):
                 logger.info(f"Choose scihub url [{i}]: {scihub_url.url}")
                 return self._run(scihub_url.url)
             except Exception:
-                logger.warning(
-                    f"Error occurs, task status: {self.context['status']}, error: {self.context['error']}"
-                )
+                logger.warning(f"Error occurs, task status: {self.context['status']}, error: {self.context['error']}")
                 continue
-        logger.error(
-            f"Failed to download the paper: {self.source_keyword}. Please try again."
-        )
+        logger.error(f"Failed to download the paper: {self.source_keyword}. Please try again.")
         return None
 
     def _run(self, scihub_url: str) -> Path:

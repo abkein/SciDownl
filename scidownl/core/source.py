@@ -71,14 +71,8 @@ class PmidSource(BaseSource):
     def _clean_pmid(pmid: Any) -> str:
         if pmid is None:
             raise EmptyPmidException("Empty pmid is given")
-        if (
-            not isinstance(pmid, str)
-            and not isinstance(pmid, int)
-            or isinstance(pmid, bool)
-        ):
-            raise TypeError(
-                f"PMID must be either a string or an integer, got a {type(pmid)} instead"
-            )
+        if not isinstance(pmid, str) and not isinstance(pmid, int) or isinstance(pmid, bool):
+            raise TypeError(f"PMID must be either a string or an integer, got a {type(pmid)} instead")
 
         pmid_str = str(pmid)
         if len(pmid_str) == 0:
@@ -108,9 +102,7 @@ class TitleSource(BaseSource):
         if title is None:
             raise EmptyTitleException("Empty title is given")
         if not isinstance(title, str):
-            raise TypeError(
-                f"Title must be either a string or an integer, got a {type(title)} instead"
-            )
+            raise TypeError(f"Title must be either a string or an integer, got a {type(title)} instead")
 
         title_str = str(title).strip()
         if len(title_str) == 0:

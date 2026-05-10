@@ -34,9 +34,7 @@ class TestTask(unittest.TestCase):
             try:
                 task.run()
             except Exception:
-                logger.error(
-                    f"final status: {task.context['status']}, error: {task.context['error']}"
-                )
+                logger.error(f"final status: {task.context['status']}, error: {task.context['error']}")
         shutil.rmtree(tmp_paper_dir)
 
     def test_run_one_task(self) -> None:

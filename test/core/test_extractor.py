@@ -28,8 +28,7 @@ class TestExtractor(unittest.TestCase):
             pdf_url_title_info.get_url(),
         )
         self.assertEqual(
-            "Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. "
-            "Advances in Protein Chemistry and Structural Biology, 217–247",
+            "Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. " "Advances in Protein Chemistry and Structural Biology, 217–247",
             pdf_url_title_info.get_title(),
         )
 

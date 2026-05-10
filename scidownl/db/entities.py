@@ -54,8 +54,4 @@ class ScihubUrl(Base):  # type: ignore[misc]
         self.failed_times = failed_times
 
     def __repr__(self) -> str:
-        return (
-            f"<ScihubUrl(url={self.url}, "
-            f"success_times={self.success_times}, "
-            f"failed_times={self.failed_times})>"
-        )
+        return f"<ScihubUrl(url={self.url}, " f"success_times={self.success_times}, " f"failed_times={self.failed_times})>"

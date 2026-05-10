@@ -31,16 +31,9 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         self.service = ScihubUrlService()
 
         # use strings defined in configs.
-        self.domain_source_url = (
-            domain_source_url
-            or configs["scihub.domain.updater.crawl"]["scihub_domain_source"]
-        )
-        self._domain_url_pattern = configs["scihub.domain.updater.crawl"][
-            "scihub_url_pattern"
-        ]
-        self._exclude_url_pattern = configs["scihub.domain.updater.crawl"][
-            "exclude_url_pattern"
-        ]
+        self.domain_source_url = domain_source_url or configs["scihub.domain.updater.crawl"]["scihub_domain_source"]
+        self._domain_url_pattern = configs["scihub.domain.updater.crawl"]["scihub_url_pattern"]
+        self._exclude_url_pattern = configs["scihub.domain.updater.crawl"]["exclude_url_pattern"]
 
     def update_domains(self) -> list[str]:
         html = requests.get(self.domain_source_url).text
@@ -50,9 +43,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         domain_urls = list(set(domain_urls))
         # Exclude invalid urls.
         available_domain_urls = self.exclude_domain_urls(domain_urls)
-        logger.info(
-            f"Found {len(available_domain_urls)} valid SciHub domains in total: {available_domain_urls}"
-        )
+        logger.info(f"Found {len(available_domain_urls)} valid SciHub domains in total: {available_domain_urls}")
 
         # Save to db.
         urls_to_save = [ScihubUrl(url=url) for url in available_domain_urls]
@@ -60,9 +51,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         logger.info(f"Saved {len(urls_to_save)} SciHub domains to local db.")
         return available_domain_urls
 
-    def exclude_domain_urls(
-        self, domain_urls: list[str], exclude_url_pattern: str | None = None
-    ) -> list[str]:
+    def exclude_domain_urls(self, domain_urls: list[str], exclude_url_pattern: str | None = None) -> list[str]:
         exclude_url_pattern = exclude_url_pattern or self._exclude_url_pattern
         remain_urls: list[str] = []
         for url in domain_urls:
@@ -92,20 +81,9 @@ class SearchScihubDomainUpdater(DomainUpdater):
 
         # read from configs
         self._domain_prefixes = ["http://sci-hub.", "https://sci-hub."]
-        self._keyword_pattern = (
-            title_keyword_pattern
-            or configs["scihub.domain.updater.search"]["scihub_title_keyword_pattern"]
-        )
-        self._num_workers = (
-            num_workers
-            or configs["scihub.domain.updater.search"].getint("num_workers")
-            or 1
-        )
-        self._timeout = (
-            timeout
-            or configs["scihub.domain.updater.search"].getint("check_timeout")
-            or 60
-        )
+        self._keyword_pattern = title_keyword_pattern or configs["scihub.domain.updater.search"]["scihub_title_keyword_pattern"]
+        self._num_workers = num_workers or configs["scihub.domain.updater.search"].getint("num_workers") or 1
+        self._timeout = timeout or configs["scihub.domain.updater.search"].getint("check_timeout") or 60
 
     def update_domains(self) -> list[str]:
         search_urls = self._get_search_urls()
@@ -113,10 +91,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
 
         valid_urls: list[str] = []
         with ThreadPoolExecutor(max_workers=self._num_workers) as executor:
-            future_to_url = {
-                executor.submit(self._check_valid_url, url, self._timeout): url
-                for url in search_urls
-            }
+            future_to_url = {executor.submit(self._check_valid_url, url, self._timeout): url for url in search_urls}
             for future in as_completed(future_to_url):
                 url = future_to_url[future]
                 try:
@@ -126,9 +101,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
                 except Exception as exc:
                     logger.error("%r generated an exception: %s" % (url, exc))
 
-        logger.info(
-            f"Found {len(valid_urls)} valid SciHub domains in total: {valid_urls}"
-        )
+        logger.info(f"Found {len(valid_urls)} valid SciHub domains in total: {valid_urls}")
         # Save to db.
         urls_to_save = [ScihubUrl(url=url) for url in valid_urls]
         self.service.add_urls(urls_to_save)
@@ -156,10 +129,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
 
         content = res.content.decode()
         soup = BeautifulSoup(content, "html.parser")
-        if (
-            soup.title is not None
-            and re.search(self._keyword_pattern, soup.title.text) is not None
-        ):
+        if soup.title is not None and re.search(self._keyword_pattern, soup.title.text) is not None:
             logger.info(f"# Found a SciHub domain url: {url}")
             return True
         return False

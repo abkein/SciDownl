@@ -21,9 +21,7 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
 
     service: ScihubUrlService
 
-    def __init__(
-        self, information: UrlInformation, task: BaseTask | None = None
-    ) -> None:
+    def __init__(self, information: UrlInformation, task: BaseTask | None = None) -> None:
         BaseDownloader.__init__(self, information)
         BaseTaskStep.__init__(self, task)
         self.information = information
@@ -37,16 +35,8 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
         try:
             information = cast(UrlInformation, self.information)
             url = information.get_url()
-            proxies = (
-                cast(dict[str, str], self.task.context.get("proxies", {}))
-                if self.task is not None
-                else {}
-            )
-            timeout = (
-                self.task.context.get("timeout", None)
-                if self.task is not None
-                else None
-            )
+            proxies = cast(dict[str, str], self.task.context.get("proxies", {})) if self.task is not None else {}
+            timeout = self.task.context.get("timeout", None) if self.task is not None else None
             res = requests.get(url, stream=True, proxies=proxies, timeout=timeout)
             total_length_header = res.headers.get("content-length")
 

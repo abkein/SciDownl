@@ -27,9 +27,7 @@ def cli() -> None:
 
 
 @cli.command("config")
-@click.option(
-    "-l", "--location", is_flag=True, help="Show the location of global config file."
-)
+@click.option("-l", "--location", is_flag=True, help="Show the location of global config file.")
 @click.option(
     "-g",
     "--get",
@@ -49,15 +47,11 @@ def config(location: bool, get: tuple[str, str] | None) -> None:
     if get:
         sec, key = get
         if sec not in configs.sections():
-            logger.warning(
-                f"Section '{sec}' is not found. Valid sections: {configs.sections()}"
-            )
+            logger.warning(f"Section '{sec}' is not found. Valid sections: {configs.sections()}")
             return
         value = configs[sec].get(key, None)
         if value is None:
-            logger.warning(
-                f"Key '{key} is not found. Valid keys: {list(dict(configs.items(sec)).keys())}"
-            )
+            logger.warning(f"Key '{key} is not found. Valid keys: {list(dict(configs.items(sec)).keys())}")
             return
         logger.info(f"Value: {configs[sec][key]}")
 
@@ -76,11 +70,7 @@ def update_domains(mode: str) -> None:
 
     updater_cls = scihub_domain_updaters.get(mode, None)
     if updater_cls is None:
-        logger.error(
-            f"Update mode (-m) must be one of "
-            f"{list(scihub_domain_updaters.keys())}, got "
-            f"'{mode}' instead."
-        )
+        logger.error(f"Update mode (-m) must be one of " f"{list(scihub_domain_updaters.keys())}, got " f"'{mode}' instead.")
         return
     updater = updater_cls()
     updater.update_domains()
@@ -108,23 +98,20 @@ def list_domains() -> None:
     "-d",
     "--doi",
     multiple=True,
-    help="DOI string. Specifying multiple DOIs is supported, "
-    "e.g., --doi FIRST_DOI --doi SECOND_DOI ... ",
+    help="DOI string. Specifying multiple DOIs is supported, " "e.g., --doi FIRST_DOI --doi SECOND_DOI ... ",
 )
 @click.option(
     "-p",
     "--pmid",
     multiple=True,
     type=int,
-    help="PMID numbers. Specifying multiple PMIDs is supported, "
-    "e.g., --pmid FIRST_PMID --pmid SECOND_PMID ...",
+    help="PMID numbers. Specifying multiple PMIDs is supported, " "e.g., --pmid FIRST_PMID --pmid SECOND_PMID ...",
 )
 @click.option(
     "-t",
     "--title",
     multiple=True,
-    help="Title string. Specifying multiple titles is supported, "
-    "e.g., --title FIRST_TITLE --title SECOND_TITLE ...",
+    help="Title string. Specifying multiple titles is supported, " "e.g., --title FIRST_TITLE --title SECOND_TITLE ...",
 )
 @click.option(
     "-o",
@@ -141,8 +128,7 @@ def list_domains() -> None:
 @click.option(
     "-u",
     "--scihub-url",
-    help="Scihub domain url. If not specified, automatically choose one from local saved domains. "
-    "It's recommended to leave this option empty.",
+    help="Scihub domain url. If not specified, automatically choose one from local saved domains. " "It's recommended to leave this option empty.",
 )
 @click.option(
     "-x",
@@ -178,10 +164,7 @@ def download(
         logger.info("%15s: %s" % ("Output", out))
 
     if scihub_url is None:
-        logger.info(
-            "%15s: <auto.%s>"
-            % ("SciHub Url", configs["scihub.task"]["scihub_url_chooser_type"])
-        )
+        logger.info("%15s: <auto.%s>" % ("SciHub Url", configs["scihub.task"]["scihub_url_chooser_type"]))
     else:
         logger.info("%15s: %s" % ("SciHub Url", scihub_url))
 
@@ -243,9 +226,7 @@ def download(
         try:
             task.run()
         except Exception:
-            logger.error(
-                f"final status: {task.context['status']}, error: {task.context['error']}"
-            )
+            logger.error(f"final status: {task.context['status']}, error: {task.context['error']}")
 
 
 if __name__ == "__main__":

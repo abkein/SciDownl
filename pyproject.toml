@@ -22,6 +22,7 @@ dependencies = [
   "SQLAlchemy>=1.4.31",
   "tablib[cli]>=3.2.0",
   "wget>=3.2",
+  "curl_cffi>=0.5.0"
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -55,3 +56,6 @@ reportMissingModuleSource = false
 [tool.mypy]
 strict = true
 files = ["scidownl", "test"]
+
+[tool.isort]
+profile = "black"
