@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from scidownl.db.entities import get_engine, create_tables, ScihubUrl
 from scidownl.log import get_logger
@@ -18,14 +18,14 @@ class TestEntities(unittest.TestCase):
 
         create_tables(test=True)
         engine = get_engine(echo=False, test=True)
-        Session: sessionmaker[str] = sessionmaker(bind=engine)  # pyright: ignore[reportUnknownVariableType]
+        SessionCls: sessionmaker[Session] = sessionmaker(bind=engine)
 
         # Add
         items = [
             ScihubUrl(url="http://sci-hub.se"),
             ScihubUrl(url="https://sci-hub.sd"),
         ]
-        session = Session()
+        session = SessionCls()
         for item in items:
             try:
                 session.add(item)
@@ -37,7 +37,7 @@ class TestEntities(unittest.TestCase):
         # Query
         exist_url = ScihubUrl(url="http://sci-hub.se")
         non_exist_url = ScihubUrl(url="http://sci-hub.non-exist")
-        session = Session()
+        session = SessionCls()
         exist_rec = session.query(ScihubUrl).filter_by(url=exist_url.url).first()
         assert exist_rec is not None
         self.assertEqual(exist_url.url, exist_rec.url)
@@ -47,7 +47,7 @@ class TestEntities(unittest.TestCase):
 
         # Modify
         modify_url = ScihubUrl(url="http://sci-hub.se")
-        session = Session()
+        session = SessionCls()
         session.query(ScihubUrl).filter_by(url=modify_url.url).update({ScihubUrl.success_times: ScihubUrl.success_times + 1})
         session.commit()
         modified_rec = session.query(ScihubUrl).filter_by(url=modify_url.url).first()
@@ -57,7 +57,7 @@ class TestEntities(unittest.TestCase):
         session.close()
 
         # Delete
-        session = Session()
+        session = SessionCls()
         urls = session.query(ScihubUrl).all()
         for url in urls:
             session.delete(url)

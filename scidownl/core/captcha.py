@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 """ALTCHA captcha solver for Sci-Hub."""
 
-from typing import TYPE_CHECKING
+# pyright: ignore[reportUnknownVariableType, reportUnknownMemberType, reportUnknownArgumentType]
+# pyright: reportUnknownVariableType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false
+
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from curl_cffi import requests as requests
@@ -49,13 +54,17 @@ def solve_altcha(
     proxies = proxies or {}
     soup = BeautifulSoup(html_content, "html.parser")
 
-    widget = soup.select_one("altcha-widget")
+    widget = soup.find("altcha-widget")
     if widget is None:
         return False
 
-    challenge_path = widget.get("challengeurl")
-    if not isinstance(challenge_path, str) or not challenge_path:
+    challenge_path: str | Any = widget.get("challengeurl")  # type: ignore[union-attr]
+    if challenge_path is None:
         return False
+    if not isinstance(challenge_path, str):
+        return False
+
+    assert isinstance(challenge_path, str)
 
     # Extract solution submission path from the inline script
     solution_path = None
@@ -73,6 +82,7 @@ def solve_altcha(
 
     # Fetch the challenge
     challenge_url = base_url.rstrip("/") + challenge_path
+    challenge: dict[str, Any] = {}
     try:
         challenge_res = session.get(challenge_url, proxies=proxies, timeout=10)
         challenge = challenge_res.json()
@@ -80,12 +90,12 @@ def solve_altcha(
         logger.warning(f"Failed to fetch captcha challenge: {e}")
         return False
 
-    salt = challenge["salt"]
-    target = challenge["challenge"]
-    max_number = challenge.get("maxNumber", 500000)
-    signature = challenge.get("signature", "")
-    algorithm = challenge.get("algorithm", "SHA-256")
-    hash_name = algorithm.replace("-", "").lower()
+    salt: str = challenge["salt"]
+    target: str = challenge["challenge"]
+    max_number: int = challenge.get("maxNumber", 500000)
+    signature: str = challenge.get("signature", "")
+    algorithm: str = challenge.get("algorithm", "SHA-256")
+    hash_name: str = algorithm.replace("-", "").lower()
 
     # Solve the proof-of-work
     logger.info(f"Solving ALTCHA captcha (max={max_number})...")

@@ -6,7 +6,7 @@ from typing import Any, cast
 
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.engine import Engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from ..config import get_config
 

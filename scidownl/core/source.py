@@ -12,6 +12,7 @@ class DoiSource(BaseSource):
     """A DOI source dict."""
 
     DOI_PROTOCOLS: list[str] = ["http://", "https://"]
+    DOI_URL_PREFIXES: list[str] = ["doi.org/", "dx.doi.org/"]
     doi: str
     protocol: str
 
@@ -35,6 +36,9 @@ class DoiSource(BaseSource):
         doi_str = doi
         for proto in DoiSource.DOI_PROTOCOLS:
             doi_str = doi_str.replace(proto, "")
+        for prefix in DoiSource.DOI_URL_PREFIXES:
+            if doi.startswith(prefix):
+                doi = doi[len(prefix) :]
         return doi_str
 
     @staticmethod

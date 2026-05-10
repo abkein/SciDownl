@@ -37,34 +37,35 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
             url = information.get_url()
             proxies = cast(dict[str, str], self.task.context.get("proxies", {})) if self.task is not None else {}
             timeout = self.task.context.get("timeout", None) if self.task is not None else None
-            res = requests.get(url, stream=True, proxies=proxies, timeout=timeout)
-            total_length_header = res.headers.get("content-length")
-
-            with out.open("wb") as fp:
-                if total_length_header is None:
-                    # no content length header
+            # Reuse the crawler's session (curl_cffi with impersonation) to
+            # carry over DDoS-Guard cookies and browser fingerprint.
+            session: requests.Session | None = self.task.context.get("session", None) if self.task is not None else None
+            if session is not None:
+                # curl_cffi's .content is empty when stream=True, so download
+                # without streaming and write the content directly.
+                res = session.get(url, proxies=proxies, timeout=timeout)
+                with out.open("wb") as fp:
                     fp.write(res.content)
-                else:
-                    download_length = 0
-                    total_length = int(total_length_header)
-                    bar_width = 50
-                    for data in res.iter_content(chunk_size=4096):
-                        download_length += len(data)
-                        fp.write(data)
-                        done_width = int(bar_width * download_length / total_length)
-                        perc = int(100 * download_length / total_length)
-                        sys.stdout.write(
-                            "\r%3d%% [%s%s] %s/%s"
-                            % (
-                                perc,
-                                "=" * done_width,
-                                " " * (bar_width - done_width),
-                                download_length,
-                                total_length,
-                            )
-                        )
-                        sys.stdout.flush()
-                    sys.stdout.write("\n")
+            else:
+                res = requests.get(url, stream=True, proxies=proxies)
+                content_length = res.headers.get("content-length")
+
+                with open(out, "wb") as f:
+                    if content_length is None:
+                        # no content length header
+                        f.write(res.content)
+                    else:
+                        download_length = 0
+                        total_length = int(content_length)
+                        bar_width = 50
+                        for data in res.iter_content(chunk_size=4096):
+                            download_length += len(data)
+                            f.write(data)
+                            done_width = int(bar_width * download_length / total_length)
+                            perc = int(100 * download_length / total_length)
+                            sys.stdout.write("\r%3d%% [%s%s] %s/%s" % (perc, "=" * done_width, " " * (bar_width - done_width), download_length, total_length))
+                            sys.stdout.flush()
+                        sys.stdout.write("\n")
                     sys.stdout.flush()
             logger.info(f"↓ Successfully download the url to: {out.as_posix()}")
 

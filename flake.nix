@@ -62,9 +62,11 @@
             wget
             setuptools
             curl-cffi
+            pytest
 
             # type checking
             types-requests
+            types-beautifulsoup4
             mypy
             flake8
             # flake8-quotes
@@ -78,7 +80,7 @@
             black
             autopep8
             ruff
-          ]
+          ] ++ tablib.optional-dependencies.cli
         );
       in
       {

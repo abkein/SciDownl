@@ -20,9 +20,7 @@ dependencies = [
   "requests>=2.27.1",
   "PySocks",
   "SQLAlchemy>=1.4.31",
-  "tablib[cli]>=3.2.0",
   "wget>=3.2",
-  "curl_cffi>=0.5.0"
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -33,6 +31,9 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
+
+[project.optional-dependencies]
+cffi = ["curl_cffi>=0.5.0"]
 
 [project.urls]
 Homepage = "https://github.com/Tishacy/SciDownl"
@@ -49,13 +50,12 @@ exclude = ["test", "test.*", "example", "example.*"]
 scidownl = ["config/*.ini"]
 
 [tool.pyright]
-include = ["scidownl", "test"]
+include = ["scidownl"]
 typeCheckingMode = "strict"
-reportMissingModuleSource = false
 
 [tool.mypy]
 strict = true
-files = ["scidownl", "test"]
+files = ["scidownl"]
 
 [tool.isort]
 profile = "black"

@@ -80,17 +80,14 @@ def update_domains(mode: str) -> None:
 @click.help_option("-h", "--help")
 def list_domains() -> None:
     """List available SciHub domains in local db."""
-    import tablib
     from ..db.service import ScihubUrlService
 
     service = ScihubUrlService()
     urls = service.get_all_urls()
     urls.sort(key=lambda url: url.success_times, reverse=True)
-    tab = tablib.Dataset(headers=["Url", "SuccessTimes", "FailedTimes"])
+    print(["Url", "SuccessTimes", "FailedTimes"])
     for url in urls:
-        tab.append((url.url, url.success_times, url.failed_times))
-    tab_str = tab.export("cli", tablefmt="psql")
-    print(tab_str)
+        print((url.url, url.success_times, url.failed_times))
 
 
 @cli.command("download")

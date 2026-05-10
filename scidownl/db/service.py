@@ -60,6 +60,6 @@ class ScihubUrlService:
 
     def get_all_urls(self) -> list[ScihubUrl]:
         session = self.session_class()
-        all_urls = session.query(ScihubUrl).all()
+        all_urls: list[ScihubUrl] = session.query(ScihubUrl).all()
         session.close()
         return all_urls
