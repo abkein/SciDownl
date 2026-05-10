@@ -9,7 +9,7 @@ def scihub_download(
         paper_type: str = 'doi',
         scihub_url: str | None = None,
         out: str | None = None,
-        proxies: dict | None = None
+        proxies: dict[str, str] | None = None
     ) -> None:
     """Download a paper from SciHub.
 
@@ -28,7 +28,7 @@ def scihub_download(
         name of the paper's title.
     """
     proxies = proxies or {}
-    return ScihubTask(
+    ScihubTask(
         source_keyword=keyword,
         source_type=paper_type,
         scihub_url=scihub_url,

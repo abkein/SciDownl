@@ -1,0 +1,9 @@
+from typing import Any
+
+
+class Dataset:
+    headers: list[str] | None
+
+    def __init__(self, *args: Any, headers: list[str] | None = None, **kwargs: Any) -> None: ...
+    def append(self, row: tuple[Any, ...]) -> None: ...
+    def export(self, format: str, **kwargs: Any) -> str: ...

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Command line tool of scidownl."""
 import os.path
+from typing import TypedDict
 
 import click
 
@@ -9,9 +10,17 @@ from ..log import get_logger
 logger = get_logger()
 
 
+class DownloadTaskKwargs(TypedDict):
+    source_keyword: str | int
+    source_type: str
+    scihub_url: str | None
+    out: str | None
+    proxies: dict[str, str]
+
+
 @click.group()
 @click.help_option("-h", "--help")
-def cli():
+def cli() -> None:
     """Command line tool to download pdfs from Scihub."""
     pass
 
@@ -21,7 +30,7 @@ def cli():
 @click.option("-g", "--get", type=(str, str), help="Get config by section and key, "
                                                    "usage: --get <section> <key>.")
 @click.help_option("-h", "--help")
-def config(location, get):
+def config(location: bool, get: tuple[str, str] | None) -> None:
     """Get global configs."""
     from ..config import get_config, GlobalConfig
 
@@ -46,7 +55,7 @@ def config(location, get):
 @click.option("-m", "--mode", default='crawl', help="update mode, could be 'crawl' or 'search',"
                                                     " default mode is 'crawl'.")
 @click.help_option("-h", "--help")
-def update_domains(mode):
+def update_domains(mode: str) -> None:
     """Update available SciHub domains and save them to local db."""
     from ..core.updater import scihub_domain_updaters
 
@@ -62,9 +71,9 @@ def update_domains(mode):
 
 @cli.command("domain.list")
 @click.help_option("-h", "--help")
-def list_domains():
+def list_domains() -> None:
     """List available SciHub domains in local db."""
-    import tablib
+    import tablib  # type: ignore[import-untyped]
     from ..db.service import ScihubUrlService
 
     service = ScihubUrlService()
@@ -102,7 +111,14 @@ def list_domains():
 @click.option("-x", "--proxy",
               help="Proxy with the format of SCHEME=PROXY_ADDRESS. e.g., --proxy http=http://127.0.0.1:7890.")
 @click.help_option("-h", "--help")
-def download(doi, pmid, title, out, scihub_url, proxy: str):
+def download(
+        doi: tuple[str, ...],
+        pmid: tuple[int, ...],
+        title: tuple[str, ...],
+        out: str | None,
+        scihub_url: str | None,
+        proxy: str | None
+    ) -> None:
     """Download paper(s) by DOI or PMID."""
     from ..core.task import ScihubTask
     from ..config import get_config
@@ -132,12 +148,14 @@ def download(doi, pmid, title, out, scihub_url, proxy: str):
         if out is not None and out[-1] != "/":
             out = out + '/'
 
-    proxies = {}
+    proxies: dict[str, str] = {}
     # Load proxies configured in global configurations.
-    if configs['proxy'].get('http') is not None:
-        proxies['http'] = configs['proxy'].get('http')
-    if configs['proxy'].get('https') is not None:
-        proxies['https'] = configs['proxy'].get('https')
+    http_proxy = configs['proxy'].get('http')
+    if http_proxy is not None:
+        proxies['http'] = http_proxy
+    https_proxy = configs['proxy'].get('https')
+    if https_proxy is not None:
+        proxies['https'] = https_proxy
 
     # Overwrite the proxy with the user specified proxy.
     if proxy is not None and "=" in proxy:
@@ -147,7 +165,7 @@ def download(doi, pmid, title, out, scihub_url, proxy: str):
     if len(proxies) > 0:
         logger.info("%15s: %s" % ("Proxies", proxies))
 
-    tasks = []
+    tasks: list[DownloadTaskKwargs] = []
     for doi_item in doi:
         tasks.append({
             'source_keyword': doi_item,
@@ -176,7 +194,7 @@ def download(doi, pmid, title, out, scihub_url, proxy: str):
         task = ScihubTask(**task_kwargs)
         try:
             task.run()
-        except Exception as e:
+        except Exception:
             logger.error(f"final status: {task.context['status']}, error: {task.context['error']}")
 
 

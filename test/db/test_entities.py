@@ -8,15 +8,15 @@ logger = get_logger()
 
 class TestEntities(unittest.TestCase):
 
-    def test_create_tables(self):
+    def test_create_tables(self) -> None:
         create_tables(test=True)
 
-    def test_orm(self):
+    def test_orm(self) -> None:
         from sqlalchemy.orm import sessionmaker
 
         create_tables(test=True)
         engine = get_engine(echo=False, test=True)
-        Session = sessionmaker(bind=engine)
+        Session = sessionmaker(bind=engine)  # pyright: ignore[reportUnknownVariableType]
 
         # Add
         items = [
@@ -28,7 +28,7 @@ class TestEntities(unittest.TestCase):
             try:
                 session.add(item)
                 session.commit()
-            except Exception as e:
+            except Exception:
                 session.rollback()
         session.close()
 
@@ -47,7 +47,7 @@ class TestEntities(unittest.TestCase):
         modify_url = ScihubUrl(url="http://sci-hub.se")
         session = Session()
         session.query(ScihubUrl).filter_by(url=modify_url.url).update({
-            ScihubUrl.success_times: ScihubUrl.success_times + 1
+            ScihubUrl.success_times: ScihubUrl.success_times + 1  # type: ignore[dict-item]
         })
         session.commit()
         modified_rec = session.query(ScihubUrl).filter_by(url=modify_url.url).first()

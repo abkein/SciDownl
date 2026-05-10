@@ -6,7 +6,7 @@ from scidownl.core.crawler import ScihubCrawler
 
 class TestCrawler(unittest.TestCase):
 
-    def test_scihub_crawl(self):
+    def test_scihub_crawl(self) -> None:
         scihub_url = "https://sci-hub.st"
 
         # Test crawling with PMID.
@@ -18,7 +18,7 @@ class TestCrawler(unittest.TestCase):
         ScihubCrawler(doi_source, scihub_url).crawl()
 
         # Test crawling a non-exist PMID.
-        pmid_source = PmidSource(0000)
+        pmid_source = PmidSource(0)
         ScihubCrawler(pmid_source, scihub_url).crawl()
 
 

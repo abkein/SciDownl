@@ -5,15 +5,15 @@ from scidownl.core.chooser import SimpleScihubUrlChooser, RandomScihubUrlChooser
 
 class TestChooser(unittest.TestCase):
 
-    def test_simple_chooser(self):
+    def test_simple_chooser(self) -> None:
         chooser = SimpleScihubUrlChooser()
         self.assertGreaterEqual(len(chooser), 0)
 
-    def test_random_chooser(self):
+    def test_random_chooser(self) -> None:
         chooser = RandomScihubUrlChooser()
         self.assertGreaterEqual(len(chooser), 0)
 
-    def test_availability_first_chooser(self):
+    def test_availability_first_chooser(self) -> None:
         chooser = AvailabilityFirstScihubUrlChooser()
         self.assertGreaterEqual(len(chooser), 0)
 

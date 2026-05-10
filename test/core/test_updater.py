@@ -5,7 +5,7 @@ from scidownl.core.updater import CrawlingScihubDomainUpdater, SearchScihubDomai
 
 class TestDomainUpdater(unittest.TestCase):
 
-    def test_crawling_scihub_domain_updater_exclude_method(self):
+    def test_crawling_scihub_domain_updater_exclude_method(self) -> None:
         domain_urls = [
             "http://sci-hub.se",
             "https://sci-hub.fun",
@@ -13,16 +13,16 @@ class TestDomainUpdater(unittest.TestCase):
         ]
         exclude_url_pattern = ".fun"
         updater = CrawlingScihubDomainUpdater()
-        available_urls = updater._exclude_domain_urls(domain_urls, exclude_url_pattern)
+        available_urls = updater._exclude_domain_urls(domain_urls, exclude_url_pattern)  # pyright: ignore[reportPrivateUsage]
         self.assertEqual(1, len(available_urls))
         self.assertEqual("http://sci-hub.se", available_urls[0])
 
-    def test_crawling_scihub_domain_updater_update_domains(self):
+    def test_crawling_scihub_domain_updater_update_domains(self) -> None:
         updater = CrawlingScihubDomainUpdater()
         domain_urls = updater.update_domains()
         self.assertTrue(len(domain_urls) != 0)
 
-    def test_search_scihub_domain_updater_update_domains(self):
+    def test_search_scihub_domain_updater_update_domains(self) -> None:
         updater = SearchScihubDomainUpdater()
         domain_urls = updater.update_domains()
         self.assertTrue(len(domain_urls) != 0)

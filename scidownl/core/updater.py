@@ -19,7 +19,12 @@ configs = get_config()
 
 class CrawlingScihubDomainUpdater(DomainUpdater):
     """Updater of Scihub domains by crawling a domain source."""
-    def __init__(self, domain_source_url: str | None = None):
+    service: ScihubUrlService
+    domain_source_url: str
+    _domain_url_pattern: str
+    _exclude_url_pattern: str
+
+    def __init__(self, domain_source_url: str | None = None) -> None:
         super().__init__()
         self.service = ScihubUrlService()
 
@@ -30,7 +35,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
 
     def update_domains(self) -> list[str]:
         html = requests.get(self.domain_source_url).text
-        domain_urls = re.findall(self._domain_url_pattern, html)
+        domain_urls: list[str] = re.findall(self._domain_url_pattern, html)
 
         # Drop duplicates.
         domain_urls = list(set(domain_urls))
@@ -46,7 +51,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
 
     def _exclude_domain_urls(self, domain_urls: list[str], exclude_url_pattern: str | None = None) -> list[str]:
         exclude_url_pattern = exclude_url_pattern or self._exclude_url_pattern
-        remain_urls = []
+        remain_urls: list[str] = []
         for url in domain_urls:
             if not re.search(exclude_url_pattern, url):
                 remain_urls.append(url)
@@ -56,10 +61,15 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
 class SearchScihubDomainUpdater(DomainUpdater):
     """Updater of Scihub domains by brute force search."""
 
-    OK_STATUS_CODES = [200]
+    OK_STATUS_CODES: list[int] = [200]
+    service: ScihubUrlService
+    _domain_prefixes: list[str]
+    _keyword_pattern: str
+    _num_workers: int
+    _timeout: int
 
     def __init__(self, title_keyword_pattern: str | None = None, num_workers: int | None = None,
-                 timeout: int | None = None):
+                 timeout: int | None = None) -> None:
         super().__init__()
         self.service = ScihubUrlService()
 
@@ -74,7 +84,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
         search_urls = self._get_search_urls()
         logger.info(f"# Search valid SciHub domains from {len(search_urls)} urls")
 
-        valid_urls = []
+        valid_urls: list[str] = []
         with ThreadPoolExecutor(max_workers=self._num_workers) as executor:
             future_to_url = {
                 executor.submit(self._check_valid_url, url, self._timeout): url
@@ -96,9 +106,9 @@ class SearchScihubDomainUpdater(DomainUpdater):
         logger.info(f"Saved {len(urls_to_save)} SciHub domains to local db.")
         return valid_urls
 
-    def _get_search_urls(self):
+    def _get_search_urls(self) -> list[str]:
         letters = string.ascii_lowercase
-        search_urls = []
+        search_urls: list[str] = []
         for first_letter in letters:
             for second_letter in letters:
                 for prefix in self._domain_prefixes:
@@ -108,7 +118,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
     def _check_valid_url(self, url: str, timeout: int = 60) -> bool:
         try:
             res = requests.get(url, timeout=timeout)
-        except Exception as e:
+        except Exception:
             # Cannot connect the specified url, skip it.
             return False
 
@@ -123,7 +133,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
         return False
 
 
-scihub_domain_updaters = {
+scihub_domain_updaters: dict[str, type[DomainUpdater]] = {
     'crawl': CrawlingScihubDomainUpdater,
     'search': SearchScihubDomainUpdater
 }

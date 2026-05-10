@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """Services to manipulate entities"""
+from typing import Any
+
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
 from ..log import get_logger
@@ -10,7 +13,10 @@ logger = get_logger()
 
 
 class ScihubUrlService:
-    def __init__(self, test: bool = False):
+    engine: Engine
+    session_class: sessionmaker[Any]
+
+    def __init__(self, test: bool = False) -> None:
         create_tables()
         self.engine = get_engine(test=test)
         self.session_class = sessionmaker(bind=self.engine)
@@ -23,12 +29,12 @@ class ScihubUrlService:
             try:
                 session.add(url)
                 session.commit()
-            except Exception as e:
+            except Exception:
                 session.rollback()
         session.close()
 
     def increment_success_times(self, url: str | None) -> None:
-        if url is None or not isinstance(url, str):
+        if url is None:
             return
         session = self.session_class()
         try:
@@ -42,7 +48,7 @@ class ScihubUrlService:
         session.close()
 
     def increment_failed_times(self, url: str | None) -> None:
-        if url is None or not isinstance(url, str):
+        if url is None:
             return
         session = self.session_class()
         try:

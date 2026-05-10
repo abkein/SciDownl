@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 """Entities of tables"""
 import os
+from typing import Any, cast
 
 from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 
 from ..config import get_config
 
-Base = declarative_base()
+Base: Any = declarative_base()
 configs = get_config()
 
 
-def get_engine(echo: bool = False, test: bool = False):
+def get_engine(echo: bool = False, test: bool = False) -> Engine:
     """Returns the db engine.
 
     :param echo: if True, the Engine will log all statements.
@@ -25,7 +27,7 @@ def get_engine(echo: bool = False, test: bool = False):
     return engine
 
 
-def create_tables(test: bool = False):
+def create_tables(test: bool = False) -> None:
     """Create all tables that are not exist.
 
     :param test: if True, using test db instead.
@@ -34,14 +36,23 @@ def create_tables(test: bool = False):
     Base.metadata.create_all(engine, checkfirst=True)
 
 
-class ScihubUrl(Base):
-    __tablename__ = "scihub_url"
+class ScihubUrl(Base):  # type: ignore[misc]
+    url: str
+    success_times: int
+    failed_times: int
 
-    url = Column(String(50), primary_key=True)
-    success_times = Column(Integer, default=0)
-    failed_times = Column(Integer, default=0)
+    __tablename__: str = "scihub_url"
 
-    def __repr__(self):
+    url = cast(str, Column(String(50), primary_key=True))
+    success_times = cast(int, Column(Integer, default=0))
+    failed_times = cast(int, Column(Integer, default=0))
+
+    def __init__(self, url: str, success_times: int = 0, failed_times: int = 0) -> None:
+        self.url = url
+        self.success_times = success_times
+        self.failed_times = failed_times
+
+    def __repr__(self) -> str:
         return f"<ScihubUrl(url={self.url}, " \
                f"success_times={self.success_times}, " \
                f"failed_times={self.failed_times})>"

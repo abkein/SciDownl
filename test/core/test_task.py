@@ -11,7 +11,7 @@ configs = get_config()
 
 class TestTask(unittest.TestCase):
 
-    def test_run_tasks(self):
+    def test_run_tasks(self) -> None:
         tmp_paper_dir = './.tmp_paper/'
         cases = [
             ("10.1016/bs.apcsb.2019.08.001", 'doi', tmp_paper_dir),  # ./<title>.pdf
@@ -32,11 +32,11 @@ class TestTask(unittest.TestCase):
             )
             try:
                 task.run()
-            except Exception as e:
+            except Exception:
                 logger.error(f"final status: {task.context['status']}, error: {task.context['error']}")
         shutil.rmtree(tmp_paper_dir)
 
-    def test_run_one_task(self):
+    def test_run_one_task(self) -> None:
 
         tmp_paper_dir = './.tmp_paper/'
         ScihubTask(
@@ -46,7 +46,7 @@ class TestTask(unittest.TestCase):
         ).run()
         shutil.rmtree(tmp_paper_dir)
 
-    def test_run_one_task_with_proxies(self):
+    def test_run_one_task_with_proxies(self) -> None:
 
         tmp_paper_dir = './.tmp_paper/'
         ScihubTask(

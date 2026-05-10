@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Crawler implementations."""
 import requests
+from typing import cast
 
 from .content import HtmlContent
-from .base import BaseCrawler, BaseSource, BaseTaskStep, BaseTask, BaseContent
+from .base import BaseCrawler, BaseSource, BaseTaskStep, BaseTask
 from ..log import get_logger
 from ..exception import CrawlException
 from ..db.service import ScihubUrlService
@@ -14,9 +15,12 @@ logger = get_logger()
 class ScihubCrawler(BaseCrawler, BaseTaskStep):
     """Crawler of a scihub source."""
 
-    OK_STATUS_CODES = [200]
+    OK_STATUS_CODES: list[int] = [200]
+    scihub_url: str
+    sess: requests.Session
+    service: ScihubUrlService
 
-    def __init__(self, source: BaseSource, scihub_url: str, task: BaseTask | None = None):
+    def __init__(self, source: BaseSource, scihub_url: str, task: BaseTask | None = None) -> None:
         BaseCrawler.__init__(self, source)
         BaseTaskStep.__init__(self, task)
         self.scihub_url = scihub_url
@@ -33,7 +37,7 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
             request_params = {
                 'request': self.source[self.source.type]
             }
-            proxies = self.task.context.get('proxies', {}) if self.task is not None else {}
+            proxies = cast(dict[str, str], self.task.context.get('proxies', {})) if self.task is not None else {}
             logger.info(f"<- Request: scihub_url={self.scihub_url}, source={self.source}, proxies={proxies}")
 
             res = self.sess.post(self.scihub_url, data=request_params, proxies=proxies)
@@ -55,5 +59,5 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
                 self.service.increment_failed_times(self.scihub_url)
             raise CrawlException(f"Error occurs when crawling: {e}")
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.sess.close()

@@ -1,9 +1,10 @@
 # -*- encoding: utf-8 -*-
 """Task implementations."""
 import os.path
+from collections.abc import Callable
 from typing import Any
 
-from .base import BaseTask, ScihubUrlChooser
+from .base import BaseSource, BaseTask, ScihubUrlChooser
 from .source import DoiSource, source_classes
 from .crawler import ScihubCrawler
 from .extractor import HtmlPdfExtractor
@@ -22,14 +23,23 @@ default_chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, Availabil
 
 
 class ScihubTask(BaseTask):
+    source_keyword: Any
+    scihub_url_chooser_cls: type[ScihubUrlChooser]
+    scihub_url_chooser: ScihubUrlChooser
+    scihub_url: str | None
+    source_class: Callable[[Any], BaseSource]
+    out: str | None
+    proxies: dict[str, str]
+    service: ScihubUrlService
+    updater: CrawlingScihubDomainUpdater
 
     def __init__(self,
                  source_keyword: Any,
                  source_type: str = 'doi',
                  scihub_url: str | None = None,
-                 scihub_url_chooser_cls=default_chooser_cls,
+                 scihub_url_chooser_cls: type[ScihubUrlChooser] = default_chooser_cls,
                  out: str | None = None,
-                 proxies: dict | None = None):
+                 proxies: dict[str, str] | None = None) -> None:
         super().__init__()
         self.source_keyword = source_keyword
         self.scihub_url_chooser_cls = scihub_url_chooser_cls
@@ -43,7 +53,7 @@ class ScihubTask(BaseTask):
         self.service = ScihubUrlService()
         self.updater = CrawlingScihubDomainUpdater()
 
-    def run(self):
+    def run(self) -> None:
         if self.scihub_url is not None:
             logger.info(f"Choose the scihub url: {self.scihub_url}")
             return self._run(self.scihub_url)
@@ -57,7 +67,7 @@ class ScihubTask(BaseTask):
             try:
                 logger.info(f"Choose scihub url [{i}]: {scihub_url.url}")
                 return self._run(scihub_url.url)
-            except Exception as e:
+            except Exception:
                 logger.warning(f"Error occurs, task status: {self.context['status']}, error: {self.context['error']}")
                 continue
         logger.error(f"Failed to download the paper: {self.source_keyword}. Please try again.")
@@ -86,4 +96,5 @@ class ScihubTask(BaseTask):
         downloader = UrlDownloader(pdf_url_title_info, self)
         downloader.download(out)
         referer_url = self.context.get('referer', None)
+        referer_url = referer_url if isinstance(referer_url, str) else None
         self.service.increment_success_times(referer_url)

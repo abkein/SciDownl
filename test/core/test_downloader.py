@@ -10,7 +10,7 @@ logger = get_logger()
 
 class TestDownloader(unittest.TestCase):
 
-    def test_download_information(self):
+    def test_download_information(self) -> None:
         url = "https://sci-hub.st/downloads/2020-01-20/c1/nademi2019.pdf"
         title = "Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. Advances in Protein Chemistry and Structural Biology, 217–247"
         info = PdfUrlTitleInformation(url, title)

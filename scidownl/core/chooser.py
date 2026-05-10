@@ -2,7 +2,6 @@
 """Implementations of ScihubUrlChooser"""
 import random
 from threading import RLock
-from typing import Optional
 
 from .base import ScihubUrlChooser
 from ..db.entities import ScihubUrl
@@ -13,15 +12,19 @@ class SimpleScihubUrlChooser(ScihubUrlChooser):
     """Simple chooser of scihub urls, which would choose
     scihub urls based on the order in the database table.
     """
-    __chooser_type__ = "simple"
+    __chooser_type__: str = "simple"
+    service: ScihubUrlService
+    scihub_urls: list[ScihubUrl]
+    cursor: int
+    _lock: RLock
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.service = ScihubUrlService()
         self.scihub_urls = self.service.get_all_urls()
         self.cursor = 0
         self._lock = RLock()
 
-    def next(self) -> Optional[ScihubUrl]:
+    def next(self) -> ScihubUrl:
         with self._lock:
             if self.cursor < 0 or self.cursor >= len(self.scihub_urls):
                 raise StopIteration
@@ -29,7 +32,7 @@ class SimpleScihubUrlChooser(ScihubUrlChooser):
             self.cursor += 1
             return selected_url
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.scihub_urls)
 
 
@@ -37,16 +40,21 @@ class RandomScihubUrlChooser(ScihubUrlChooser):
     """Random chooser of scihub urls, which would choose
     scihub urls randomly, and one url won't be chosen twice.
     """
-    __chooser_type__ = "random"
+    __chooser_type__: str = "random"
+    service: ScihubUrlService
+    scihub_urls: list[ScihubUrl]
+    temp_zone: list[ScihubUrl]
+    cursor: int
+    _lock: RLock
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.service = ScihubUrlService()
         self.scihub_urls = self.service.get_all_urls()
         self.temp_zone = [url for url in self.scihub_urls]
         self.cursor = 0
         self._lock = RLock()
 
-    def next(self) -> Optional[ScihubUrl]:
+    def next(self) -> ScihubUrl:
         with self._lock:
             if len(self.temp_zone) == 0:
                 raise StopIteration
@@ -57,7 +65,7 @@ class RandomScihubUrlChooser(ScihubUrlChooser):
             self.temp_zone = [url for url in self.temp_zone if url != selected_url]
             return selected_url
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.temp_zone)
 
 
@@ -67,9 +75,14 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
         failed_rate = (failed_times) / (success_times + failed_times + 0.01)
     The tail 0.01 is used to avoid divide by zero error if (success_times + failed_times) == 0.
     """
-    __chooser_type__ = "availability_first"
+    __chooser_type__: str = "availability_first"
+    service: ScihubUrlService
+    scihub_urls: list[ScihubUrl]
+    temp_zone: list[ScihubUrl]
+    cursor: int
+    _lock: RLock
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.service = ScihubUrlService()
         self.scihub_urls = self.service.get_all_urls()
 
@@ -82,7 +95,7 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
         self.cursor = 0
         self._lock = RLock()
 
-    def next(self) -> Optional[ScihubUrl]:
+    def next(self) -> ScihubUrl:
         with self._lock:
             if self.cursor < 0 or self.cursor >= len(self.temp_zone):
                 raise StopIteration
@@ -90,11 +103,11 @@ class AvailabilityFirstScihubUrlChooser(ScihubUrlChooser):
             self.cursor += 1
             return selected_url
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.temp_zone)
 
 
-scihub_url_choosers = {
+scihub_url_choosers: dict[str, type[ScihubUrlChooser]] = {
     "simple": SimpleScihubUrlChooser,
     "random": RandomScihubUrlChooser,
     "availability_first": AvailabilityFirstScihubUrlChooser

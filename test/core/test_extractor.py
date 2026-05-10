@@ -6,7 +6,7 @@ from scidownl.core.extractor import HtmlPdfExtractor
 
 class TestExtractor(unittest.TestCase):
 
-    def test_html_pdf_extractor(self):
+    def test_html_pdf_extractor(self) -> None:
         html_content = HtmlContent("""
         <head>
             <title>Sci-Hub | Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. Advances in Protein Chemistry and Structural Biology, 217–247 | 10.1016/bs.apcsb.2019.08.001</title>

@@ -2,7 +2,7 @@
 import sys
 from threading import RLock
 from configparser import ConfigParser
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from loguru import logger
 
@@ -17,14 +17,14 @@ class LoggerLoader:
     _lock: RLock = RLock()
     _loggers: dict[str, Any] = {}
 
-    def _log_init(self):
+    def _log_init(self) -> dict[str, Any]:
         """Initialize loggings."""
         # Load log configs
         log_level = configs['log']['console_log_level']
         log_format = configs['log']['console_log_format']
 
         logger.remove()
-        loggers = {}
+        loggers: dict[str, Any] = {}
         # Add default logger
         default_logger_name = 'default'
         logger.add(sys.stderr,
@@ -39,7 +39,9 @@ class LoggerLoader:
     @staticmethod
     def _make_filter(name: str) -> Callable[[Any], bool]:
         def f(record: Any) -> bool:
-            return record["extra"].get("name") == name
+            record_dict = cast(dict[str, Any], record) if isinstance(record, dict) else {}
+            extra = cast(dict[str, Any], record_dict.get("extra", {}))
+            return bool(extra.get("name") == name)
         return f
 
     @staticmethod

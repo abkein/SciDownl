@@ -2,6 +2,7 @@
 """Downloader implementation."""
 import os
 import sys
+from typing import cast
 
 import requests
 
@@ -16,8 +17,9 @@ logger = get_logger()
 
 class UrlDownloader(BaseDownloader, BaseTaskStep):
     """Downloader of url."""
+    service: ScihubUrlService
 
-    def __init__(self, information: UrlInformation, task: BaseTask | None = None):
+    def __init__(self, information: UrlInformation, task: BaseTask | None = None) -> None:
         BaseDownloader.__init__(self, information)
         BaseTaskStep.__init__(self, task)
         self.information = information
@@ -29,18 +31,19 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
     def download(self, out: str) -> str:
         """Download a url to out"""
         try:
-            url = self.information.get_url()
-            proxies = self.task.context.get('proxies', {}) if self.task is not None else {}
+            information = cast(UrlInformation, self.information)
+            url = information.get_url()
+            proxies = cast(dict[str, str], self.task.context.get('proxies', {})) if self.task is not None else {}
             res = requests.get(url, stream=True, proxies=proxies)
-            total_length = res.headers.get('content-length')
+            total_length_header = res.headers.get('content-length')
 
             with open(out, "wb") as f:
-                if total_length is None:
+                if total_length_header is None:
                     # no content length header
                     f.write(res.content)
                 else:
                     download_length = 0
-                    total_length = int(total_length)
+                    total_length = int(total_length_header)
                     bar_width = 50
                     for data in res.iter_content(chunk_size=4096):
                         download_length += len(data)
@@ -65,6 +68,7 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
                 self.task.context['status'] = 'downloading_failed'
                 self.task.context['error'] = e
                 scihub_url = self.task.context.get('referer', None)
+                scihub_url = scihub_url if isinstance(scihub_url, str) else None
                 self.service.increment_failed_times(scihub_url)
             raise DownloadException(f"Error occurs when downloading {e}")
         return filename

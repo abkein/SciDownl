@@ -6,26 +6,28 @@ from scidownl.db.service import ScihubUrlService
 
 
 class TestDBServices(unittest.TestCase):
+    service: ScihubUrlService
 
     def setUp(self) -> None:
         create_tables(test=True)
         self.service = ScihubUrlService(test=True)
 
-    def test_scihub_url_service_add_urls(self):
+    def test_scihub_url_service_add_urls(self) -> None:
         urls = [
             ScihubUrl(url="http://sci-hub.se"),
             ScihubUrl(url="https://sci-hub.sd"),
         ]
         self.service.add_urls(urls)
 
-    def test_scihub_url_service_incr_success_times(self):
+    def test_scihub_url_service_incr_success_times(self) -> None:
         self.service.increment_success_times("http://sci-hub.se")
 
-    def test_scihub_url_service_incr_failed_times(self):
+    def test_scihub_url_service_incr_failed_times(self) -> None:
         self.service.increment_failed_times("http://sci-hub.se")
 
-    def test_scihub_url_service_get_all_urls(self):
+    def test_scihub_url_service_get_all_urls(self) -> None:
         all_urls = self.service.get_all_urls()
+        self.assertGreaterEqual(len(all_urls), 0)
 
 
 if __name__ == '__main__':

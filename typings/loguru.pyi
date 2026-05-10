@@ -1,0 +1,23 @@
+from collections.abc import Callable
+from typing import Any, TextIO
+
+
+class Logger:
+    def remove(self, handler_id: int | None = None) -> None: ...
+    def add(
+        self,
+        sink: TextIO,
+        *,
+        level: str | int = ...,
+        filter: Callable[[Any], bool] | None = ...,
+        format: str | None = ...,
+        **kwargs: Any,
+    ) -> int: ...
+    def bind(self, **kwargs: Any) -> Logger: ...
+    def debug(self, message: object, *args: Any, **kwargs: Any) -> None: ...
+    def info(self, message: object, *args: Any, **kwargs: Any) -> None: ...
+    def warning(self, message: object, *args: Any, **kwargs: Any) -> None: ...
+    def error(self, message: object, *args: Any, **kwargs: Any) -> None: ...
+
+
+logger: Logger

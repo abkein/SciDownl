@@ -50,6 +50,7 @@ scidownl = ["config/*.ini"]
 [tool.pyright]
 include = ["scidownl", "test"]
 typeCheckingMode = "strict"
+reportMissingModuleSource = false
 
 [tool.mypy]
 strict = true
