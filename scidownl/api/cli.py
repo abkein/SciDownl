@@ -88,7 +88,7 @@ def download(
         logger.info("%15s: %s" % ("TITLE(s)", list(title)))
 
     if out is None:
-        logger.info("%15s: %s" % ("Output", Path("./").resolve()))
+        logger.info("%15s: %s" % ("Output", Path("./").resolve().as_posix()))
     else:
         logger.info("%15s: %s" % ("Output", out))
 
@@ -117,7 +117,7 @@ def download(
         proxies[scheme] = proxy_address
 
     if len(proxies) > 0:
-        logger.info("%15s: %s" % ("Proxies", proxies))
+        logger.info(f"Proxies: {proxies}")
 
     tasks: list[DownloadTaskKwargs] = []
     for doi_item in doi:

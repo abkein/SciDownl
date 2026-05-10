@@ -113,7 +113,7 @@ class SearchScihubDomainUpdater(DomainUpdater):
                     if valid:
                         valid_urls.append(url)
                 except Exception as exc:
-                    logger.error("%r generated an exception: %s" % (url, exc))
+                    logger.error(f"{url} generated an exception: {exc}")
 
         logger.info(f"Found {len(valid_urls)} valid SciHub domains in total: {valid_urls}")
         # Save to db.

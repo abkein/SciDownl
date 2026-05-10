@@ -63,7 +63,7 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
                             f.write(data)
                             done_width = int(bar_width * download_length / total_length)
                             perc = int(100 * download_length / total_length)
-                            sys.stdout.write("\r%3d%% [%s%s] %s/%s" % (perc, "=" * done_width, " " * (bar_width - done_width), download_length, total_length))
+                            sys.stdout.write(f"\r{perc}% [{'=' * done_width}{' ' * (bar_width - done_width)}] {download_length}/{total_length}")
                             sys.stdout.flush()
                         sys.stdout.write("\n")
                     sys.stdout.flush()
