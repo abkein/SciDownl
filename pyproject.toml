@@ -49,4 +49,4 @@ scidownl = ["config/*.ini"]
 
 [tool.pyright]
 include = ["scidownl", "test"]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"

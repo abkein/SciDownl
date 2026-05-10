@@ -62,7 +62,8 @@
             wget
             setuptools
 
-            # type checkers
+            # type checking
+            types-requests
             mypy
             flake8
             # flake8-quotes
@@ -166,7 +167,7 @@
               buildInputs = with pkgs; [
                 jq
                 pyright
-                
+
                 # not needed yet
                 # texlive.combined.scheme-full
                 # pkg-config
