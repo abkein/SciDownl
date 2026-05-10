@@ -30,5 +30,5 @@ class TestDBServices(unittest.TestCase):
         self.assertGreaterEqual(len(all_urls), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

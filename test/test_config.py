@@ -14,5 +14,5 @@ class TestConfig(unittest.TestCase):
         self.assertGreaterEqual(len(config.sections()), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

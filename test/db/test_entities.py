@@ -18,7 +18,9 @@ class TestEntities(unittest.TestCase):
 
         create_tables(test=True)
         engine = get_engine(echo=False, test=True)
-        Session: sessionmaker[str] = sessionmaker(bind=engine)  # pyright: ignore[reportUnknownVariableType]
+        Session: sessionmaker[str] = sessionmaker(
+            bind=engine
+        )  # pyright: ignore[reportUnknownVariableType]
 
         # Add
         items = [
@@ -41,16 +43,18 @@ class TestEntities(unittest.TestCase):
         exist_rec = session.query(ScihubUrl).filter_by(url=exist_url.url).first()
         assert exist_rec is not None
         self.assertEqual(exist_url.url, exist_rec.url)
-        non_exist_rec = session.query(ScihubUrl).filter_by(url=non_exist_url.url).first()
+        non_exist_rec = (
+            session.query(ScihubUrl).filter_by(url=non_exist_url.url).first()
+        )
         self.assertIsNone(non_exist_rec)
         session.close()
 
         # Modify
         modify_url = ScihubUrl(url="http://sci-hub.se")
         session = Session()
-        session.query(ScihubUrl).filter_by(url=modify_url.url).update({
-            ScihubUrl.success_times: ScihubUrl.success_times + 1
-        })
+        session.query(ScihubUrl).filter_by(url=modify_url.url).update(
+            {ScihubUrl.success_times: ScihubUrl.success_times + 1}
+        )
         session.commit()
         modified_rec = session.query(ScihubUrl).filter_by(url=modify_url.url).first()
         assert modified_rec is not None
@@ -68,5 +72,5 @@ class TestEntities(unittest.TestCase):
         session.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

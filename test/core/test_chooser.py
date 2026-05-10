@@ -1,6 +1,10 @@
 import unittest
 
-from scidownl.core.chooser import SimpleScihubUrlChooser, RandomScihubUrlChooser, AvailabilityFirstScihubUrlChooser
+from scidownl.core.chooser import (
+    SimpleScihubUrlChooser,
+    RandomScihubUrlChooser,
+    AvailabilityFirstScihubUrlChooser,
+)
 
 
 class TestChooser(unittest.TestCase):
@@ -18,5 +22,5 @@ class TestChooser(unittest.TestCase):
         self.assertGreaterEqual(len(chooser), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

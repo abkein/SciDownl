@@ -16,12 +16,12 @@ class TestDownloader(unittest.TestCase):
         info = PdfUrlTitleInformation(url, title)
 
         downloader = UrlDownloader(info)
-        out = Path('test_paper.pdf')
+        out = Path("test_paper.pdf")
         downloader.download(out)
         self.assertTrue(out.exists())
         out.unlink()
         logger.debug(f"Remove the test paper file: {out}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -7,7 +7,8 @@ from scidownl.core.extractor import HtmlPdfExtractor
 class TestExtractor(unittest.TestCase):
 
     def test_html_pdf_extractor(self) -> None:
-        html_content = HtmlContent("""
+        html_content = HtmlContent(
+            """
         <head>
             <title>Sci-Hub | Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. Advances in Protein Chemistry and Structural Biology, 217–247 | 10.1016/bs.apcsb.2019.08.001</title>
             <meta charset="UTF-8">
@@ -18,14 +19,20 @@ class TestExtractor(unittest.TestCase):
         <div id="article">
             <embed type="application/pdf" src="//sci-hub.st/downloads/2020-01-20/c1/nademi2019.pdf#navpanes=0&amp;view=FitH" id="pdf">
         </div>
-        """)
+        """
+        )
         extractor = HtmlPdfExtractor(html_content)
         pdf_url_title_info = extractor.extract()
-        self.assertEqual("https://sci-hub.st/downloads/2020-01-20/c1/nademi2019.pdf", pdf_url_title_info.get_url())
-        self.assertEqual("Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. "
-                         "Advances in Protein Chemistry and Structural Biology, 217–247",
-                         pdf_url_title_info.get_title())
+        self.assertEqual(
+            "https://sci-hub.st/downloads/2020-01-20/c1/nademi2019.pdf",
+            pdf_url_title_info.get_url(),
+        )
+        self.assertEqual(
+            "Protein misfolding in endoplasmic reticulum stress with applications to renal diseases. "
+            "Advances in Protein Chemistry and Structural Biology, 217–247",
+            pdf_url_title_info.get_title(),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

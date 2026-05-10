@@ -14,7 +14,7 @@ class TestCrawler(unittest.TestCase):
         ScihubCrawler(pmid_source, scihub_url).crawl()
 
         # Test crawling with DOI.
-        doi_source = DoiSource('10.1016/bs.apcsb.2019.08.001')
+        doi_source = DoiSource("10.1016/bs.apcsb.2019.08.001")
         ScihubCrawler(doi_source, scihub_url).crawl()
 
         # Test crawling a non-exist PMID.
@@ -22,5 +22,5 @@ class TestCrawler(unittest.TestCase):
         ScihubCrawler(pmid_source, scihub_url).crawl()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

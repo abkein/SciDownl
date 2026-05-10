@@ -49,7 +49,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         # Drop duplicates.
         domain_urls = list(set(domain_urls))
         # Exclude invalid urls.
-        available_domain_urls = self._exclude_domain_urls(domain_urls)
+        available_domain_urls = self.exclude_domain_urls(domain_urls)
         logger.info(
             f"Found {len(available_domain_urls)} valid SciHub domains in total: {available_domain_urls}"
         )
@@ -60,7 +60,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         logger.info(f"Saved {len(urls_to_save)} SciHub domains to local db.")
         return available_domain_urls
 
-    def _exclude_domain_urls(
+    def exclude_domain_urls(
         self, domain_urls: list[str], exclude_url_pattern: str | None = None
     ) -> list[str]:
         exclude_url_pattern = exclude_url_pattern or self._exclude_url_pattern

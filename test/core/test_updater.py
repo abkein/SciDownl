@@ -13,7 +13,9 @@ class TestDomainUpdater(unittest.TestCase):
         ]
         exclude_url_pattern = ".fun"
         updater = CrawlingScihubDomainUpdater()
-        available_urls = updater._exclude_domain_urls(domain_urls, exclude_url_pattern)  # pyright: ignore[reportPrivateUsage]
+        available_urls = updater.exclude_domain_urls(
+            domain_urls, exclude_url_pattern
+        )  # pyright: ignore[reportPrivateUsage]
         self.assertEqual(1, len(available_urls))
         self.assertEqual("http://sci-hub.se", available_urls[0])
 
@@ -28,5 +30,5 @@ class TestDomainUpdater(unittest.TestCase):
         self.assertTrue(len(domain_urls) != 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
