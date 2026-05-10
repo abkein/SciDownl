@@ -12,6 +12,7 @@ def scihub_download(
     scihub_url: str | None = None,
     out: Path | None = None,
     proxies: dict[str, str] | None = None,
+    timeout: int | None = None,
 ) -> None:
     """Download a paper from SciHub.
 
@@ -36,4 +37,5 @@ def scihub_download(
         scihub_url=scihub_url,
         out=out,
         proxies=proxies,
+        timeout=timeout,
     ).run()

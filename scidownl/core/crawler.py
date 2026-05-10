@@ -43,11 +43,18 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
                 if self.task is not None
                 else {}
             )
+            timeout = (
+                self.task.context.get("timeout", None)
+                if self.task is not None
+                else None
+            )
             logger.info(
                 f"<- Request: scihub_url={self.scihub_url}, source={self.source}, proxies={proxies}"
             )
 
-            res = self.sess.post(self.scihub_url, data=request_params, proxies=proxies)
+            res = self.sess.post(
+                self.scihub_url, data=request_params, proxies=proxies, timeout=timeout
+            )
             logger.info(
                 f"-> Response: status_code={res.status_code}, content_length={len(res.content.decode())}"
             )

@@ -35,6 +35,7 @@ class ScihubTask(BaseTask):
     proxies: dict[str, str]
     service: ScihubUrlService
     updater: CrawlingScihubDomainUpdater
+    timeout: int | None
 
     def __init__(
         self,
@@ -44,6 +45,7 @@ class ScihubTask(BaseTask):
         scihub_url_chooser_cls: type[ScihubUrlChooser] = default_chooser_cls,
         out: Path | None = None,
         proxies: dict[str, str] | None = None,
+        timeout: int | None = None,
     ) -> None:
         super().__init__()
         self.source_keyword = source_keyword
@@ -53,12 +55,14 @@ class ScihubTask(BaseTask):
         self.source_class = source_classes.get(source_type, DoiSource)
         self.out = out
         self.proxies = proxies or {}
+        self.timeout = timeout
         self.context["status"] = "initialized"
         self.context["proxies"] = self.proxies
+        self.context["timeout"] = self.timeout
         self.service = ScihubUrlService()
         self.updater = CrawlingScihubDomainUpdater()
 
-    def run(self) -> None:
+    def run(self) -> Path | None:
         if self.scihub_url is not None:
             logger.info(f"Choose the scihub url: {self.scihub_url}")
             return self._run(self.scihub_url)
@@ -80,8 +84,9 @@ class ScihubTask(BaseTask):
         logger.error(
             f"Failed to download the paper: {self.source_keyword}. Please try again."
         )
+        return None
 
-    def _run(self, scihub_url: str) -> None:
+    def _run(self, scihub_url: str) -> Path:
         source = self.source_class(self.source_keyword)
         crawler = ScihubCrawler(source, scihub_url, self)
         content = crawler.crawl()
@@ -108,3 +113,4 @@ class ScihubTask(BaseTask):
         referer_url = self.context.get("referer", None)
         referer_url = referer_url if isinstance(referer_url, str) else None
         self.service.increment_success_times(referer_url)
+        return self.out

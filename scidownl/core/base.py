@@ -18,7 +18,7 @@ class BaseTask(ABC):
         self.context: dict[str, Any] = {}
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self) -> Path | None:
         """Run the task."""
         raise NotImplementedError("Implement run method before calling it.")
 
