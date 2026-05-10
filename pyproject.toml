@@ -50,3 +50,7 @@ scidownl = ["config/*.ini"]
 [tool.pyright]
 include = ["scidownl", "test"]
 typeCheckingMode = "strict"
+
+[tool.mypy]
+strict = true
+files = ["scidownl", "test"]
