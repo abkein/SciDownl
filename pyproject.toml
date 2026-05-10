@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scidownl"
+version = "1.0.2"
+description = "Download pdfs from Scihub."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Tishacy", email = "Tishacy@gmail.com" },
+]
+dependencies = [
+  "beautifulsoup4>=4.10.0",
+  "click>=8.0.4",
+  "loguru>=0.6.0",
+  "requests>=2.27.1",
+  "PySocks",
+  "SQLAlchemy>=1.4.31",
+  "tablib[cli]>=3.2.0",
+  "wget>=3.2",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/Tishacy/SciDownl"
+Repository = "https://github.com/Tishacy/SciDownl"
+
+[project.scripts]
+scidownl = "scidownl.api.cli:cli"
+
+[tool.setuptools.packages.find]
+include = ["scidownl*"]
+exclude = ["test", "test.*", "example", "example.*"]
+
+[tool.setuptools.package-data]
+scidownl = ["config/*.ini"]

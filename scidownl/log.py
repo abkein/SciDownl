@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 import sys
 from threading import RLock
+from configparser import ConfigParser
+from typing import Any, Callable
 
 from loguru import logger
 
 from .config import get_config
 
-configs = get_config()
+
+configs: ConfigParser = get_config()
 
 
 class LoggerLoader:
-    _init_status = False
-    _lock = RLock()
+    _init_status: bool = False
+    _lock: RLock = RLock()
     _loggers = {}
 
     def _log_init(self):
@@ -34,8 +37,10 @@ class LoggerLoader:
         return loggers
 
     @staticmethod
-    def _make_filter(name):
-        return lambda record: record["extra"].get("name") == name
+    def _make_filter(name: str) -> Callable[[dict[str, dict[str, Any]]], bool]:
+        def f(record: dict[str, dict[str, Any]]) -> bool:
+            return record["extra"].get("name") == name
+        return f
 
     @staticmethod
     def load(logger_name: str):
@@ -52,6 +57,6 @@ class LoggerLoader:
         return LoggerLoader._loggers.get(logger_name)
 
 
-def get_logger(name=None):
+def get_logger(name: str | None = None):
     name = name or 'default'
     return LoggerLoader.load(name)

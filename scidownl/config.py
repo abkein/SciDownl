@@ -1,37 +1,35 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import configparser
+from configparser import ConfigParser
 from threading import RLock
 
 
 class GlobalConfig(object):
-    _init_status = False
-    _lock = RLock()
-    _configs = None
-    package_dir = os.path.dirname(__file__)
-    config_fpath = os.path.abspath(os.path.join(package_dir, 'config/global.ini'))
+    _lock: RLock = RLock()
+    _config: ConfigParser | None = None
+    package_dir: str = os.path.dirname(__file__)
+    config_fpath: str = os.path.abspath(os.path.join(package_dir, 'config/global.ini'))
 
-    def _config_init(self):
+    def _config_init(self) -> ConfigParser:
         # Check if config file exists.
         if not os.path.isfile(self.config_fpath):
             print("Config file not found: %s" % self.config_fpath)
             sys.exit(2)
 
         # Read configs.
-        configs = configparser.ConfigParser()
+        configs = ConfigParser()
         configs.read(self.config_fpath)
         return configs
 
     @staticmethod
-    def get_config():
-        if not GlobalConfig._init_status:
+    def get_config() -> ConfigParser:
+        if GlobalConfig._config is None:
             with GlobalConfig._lock:
-                if not GlobalConfig._init_status:
-                    GlobalConfig._configs = GlobalConfig()._config_init()
-                    GlobalConfig._init_status = True
-        return GlobalConfig._configs
+                if GlobalConfig._config is None:
+                    GlobalConfig._config = GlobalConfig()._config_init()
+        return GlobalConfig._config
 
 
-def get_config():
+def get_config() -> ConfigParser:
     return GlobalConfig.get_config()
