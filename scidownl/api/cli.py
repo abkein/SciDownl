@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Command line tool of scidownl."""
-import os.path
+
 from typing import TypedDict
+from pathlib import Path
 
 import click
 
@@ -14,7 +15,7 @@ class DownloadTaskKwargs(TypedDict):
     source_keyword: str | int
     source_type: str
     scihub_url: str | None
-    out: str | None
+    out: Path | None
     proxies: dict[str, str]
 
 
@@ -73,7 +74,7 @@ def update_domains(mode: str) -> None:
 @click.help_option("-h", "--help")
 def list_domains() -> None:
     """List available SciHub domains in local db."""
-    import tablib  # type: ignore[import-untyped]
+    import tablib
     from ..db.service import ScihubUrlService
 
     service = ScihubUrlService()
@@ -115,7 +116,7 @@ def download(
         doi: tuple[str, ...],
         pmid: tuple[int, ...],
         title: tuple[str, ...],
-        out: str | None,
+        out: Path | None,
         scihub_url: str | None,
         proxy: str | None
     ) -> None:
@@ -134,7 +135,7 @@ def download(
         logger.info("%15s: %s" % ("TITLE(s)", list(title)))
 
     if out is None:
-        logger.info("%15s: %s" % ("Output", os.path.abspath('./')))
+        logger.info("%15s: %s" % ("Output", Path('./').resolve()))
     else:
         logger.info("%15s: %s" % ("Output", out))
 
@@ -144,9 +145,9 @@ def download(
         logger.info("%15s: %s" % ("SciHub Url", scihub_url))
 
     # Always consider out as a directory if there are multiple DOIs and PMIDs.
-    if len(doi) + len(pmid) + len(title) > 1:
-        if out is not None and out[-1] != "/":
-            out = out + '/'
+    # if len(doi) + len(pmid) + len(title) > 1:
+    #     if out is not None and out[-1] != "/":
+    #         out = out + '/'
 
     proxies: dict[str, str] = {}
     # Load proxies configured in global configurations.

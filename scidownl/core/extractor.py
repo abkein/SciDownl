@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 """Extractor implementations."""
+
 import re
 
 from bs4 import BeautifulSoup

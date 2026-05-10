@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Implementations of ScihubUrlChooser"""
+
 import random
 from threading import RLock
 

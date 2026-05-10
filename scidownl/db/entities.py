@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Entities of tables"""
-import os
+
+from pathlib import Path
 from typing import Any, cast
 
 from sqlalchemy import create_engine, Column, Integer, String
@@ -20,9 +21,9 @@ def get_engine(echo: bool = False, test: bool = False) -> Engine:
     :param test: if True, using test db instead.
     :returns :class:`sqlalchemy._engine.Engine` instance.
     """
-    par_dirpath = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    par_dirpath = Path(__file__).resolve().parent.parent
     dbname = 'test-scidownl.db' if test else configs['global_db']['db_name']
-    db_path = os.path.join(par_dirpath, dbname)
+    db_path = par_dirpath / dbname
     engine = create_engine(f'sqlite:///{db_path}?check_same_thread=False', echo=echo)
     return engine
 

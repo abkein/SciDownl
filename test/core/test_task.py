@@ -1,5 +1,6 @@
 import shutil
 import unittest
+from pathlib import Path
 
 from scidownl.core.task import ScihubTask
 from scidownl.log import get_logger
@@ -12,7 +13,7 @@ configs = get_config()
 class TestTask(unittest.TestCase):
 
     def test_run_tasks(self) -> None:
-        tmp_paper_dir = './.tmp_paper/'
+        tmp_paper_dir = Path('./.tmp_paper/')
         cases = [
             ("10.1016/bs.apcsb.2019.08.001", 'doi', tmp_paper_dir),  # ./<title>.pdf
             ("10.3343/alm.2013.33.1.8", 'doi', tmp_paper_dir),
@@ -38,7 +39,7 @@ class TestTask(unittest.TestCase):
 
     def test_run_one_task(self) -> None:
 
-        tmp_paper_dir = './.tmp_paper/'
+        tmp_paper_dir = Path('./.tmp_paper/')
         ScihubTask(
             source_keyword="10.1016/bs.apcsb.2019.08.001",
             source_type="doi",
@@ -48,7 +49,7 @@ class TestTask(unittest.TestCase):
 
     def test_run_one_task_with_proxies(self) -> None:
 
-        tmp_paper_dir = './.tmp_paper/'
+        tmp_paper_dir = Path("./.tmp_paper/")
         ScihubTask(
             source_keyword="10.1016/bs.apcsb.2019.08.001",
             source_type="doi",

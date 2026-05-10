@@ -1,7 +1,10 @@
 import unittest
 
+from sqlalchemy.orm import sessionmaker
+
 from scidownl.db.entities import get_engine, create_tables, ScihubUrl
 from scidownl.log import get_logger
+
 
 logger = get_logger()
 
@@ -12,11 +15,10 @@ class TestEntities(unittest.TestCase):
         create_tables(test=True)
 
     def test_orm(self) -> None:
-        from sqlalchemy.orm import sessionmaker
 
         create_tables(test=True)
         engine = get_engine(echo=False, test=True)
-        Session = sessionmaker(bind=engine)  # pyright: ignore[reportUnknownVariableType]
+        Session: sessionmaker[str] = sessionmaker(bind=engine)  # pyright: ignore[reportUnknownVariableType]
 
         # Add
         items = [
@@ -47,7 +49,7 @@ class TestEntities(unittest.TestCase):
         modify_url = ScihubUrl(url="http://sci-hub.se")
         session = Session()
         session.query(ScihubUrl).filter_by(url=modify_url.url).update({
-            ScihubUrl.success_times: ScihubUrl.success_times + 1  # type: ignore[dict-item]
+            ScihubUrl.success_times: ScihubUrl.success_times + 1
         })
         session.commit()
         modified_rec = session.query(ScihubUrl).filter_by(url=modify_url.url).first()

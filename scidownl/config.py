@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import os
+
 import sys
+from pathlib import Path
 from configparser import ConfigParser
 from threading import RLock
 
@@ -8,12 +9,12 @@ from threading import RLock
 class GlobalConfig(object):
     _lock: RLock = RLock()
     _config: ConfigParser | None = None
-    package_dir: str = os.path.dirname(__file__)
-    config_fpath: str = os.path.abspath(os.path.join(package_dir, 'config/global.ini'))
+    package_dir: Path = Path(__file__).parent
+    config_fpath: Path = (package_dir / 'config/global.ini').resolve()
 
     def _config_init(self) -> ConfigParser:
         # Check if config file exists.
-        if not os.path.isfile(self.config_fpath):
+        if self.config_fpath.is_dir():
             print("Config file not found: %s" % self.config_fpath)
             sys.exit(2)
 

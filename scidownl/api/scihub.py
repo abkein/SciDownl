@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """High level APIs for human"""
 
+from pathlib import Path
+
 from ..core.task import ScihubTask
 
 
@@ -8,7 +10,7 @@ def scihub_download(
         keyword: str,
         paper_type: str = 'doi',
         scihub_url: str | None = None,
-        out: str | None = None,
+        out: Path | None = None,
         proxies: dict[str, str] | None = None
     ) -> None:
     """Download a paper from SciHub.

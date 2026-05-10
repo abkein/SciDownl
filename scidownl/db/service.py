@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Services to manipulate entities"""
+
 from typing import Any
 
 from sqlalchemy.engine import Engine

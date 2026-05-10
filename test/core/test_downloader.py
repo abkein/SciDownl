@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import unittest
 
 from scidownl.core.information import PdfUrlTitleInformation
@@ -16,10 +16,10 @@ class TestDownloader(unittest.TestCase):
         info = PdfUrlTitleInformation(url, title)
 
         downloader = UrlDownloader(info)
-        out = 'test_paper.pdf'
+        out = Path('test_paper.pdf')
         downloader.download(out)
-        self.assertTrue(os.path.exists(out))
-        os.remove(out)
+        self.assertTrue(out.exists())
+        out.unlink()
         logger.debug(f"Remove the test paper file: {out}")
 
 

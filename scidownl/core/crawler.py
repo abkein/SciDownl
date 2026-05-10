@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Crawler implementations."""
+
 import requests
 from typing import cast
 

@@ -1,7 +1,9 @@
 # -*- encoding: utf-8 -*-
 """Core base abstract classes"""
+
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 from ..db.entities import ScihubUrl
@@ -118,7 +120,7 @@ class BaseDownloader(ABC):
         self.information = information
 
     @abstractmethod
-    def download(self, out: str) -> str:
+    def download(self, out: Path) -> str:
         """Download the information to local."""
         raise NotImplementedError("Implement download method before calling it.")
 

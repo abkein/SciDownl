@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 """Task implementations."""
-import os.path
+
+from pathlib import Path
 from collections.abc import Callable
 from typing import Any
 
@@ -28,7 +29,7 @@ class ScihubTask(BaseTask):
     scihub_url_chooser: ScihubUrlChooser
     scihub_url: str | None
     source_class: Callable[[Any], BaseSource]
-    out: str | None
+    out: Path | None
     proxies: dict[str, str]
     service: ScihubUrlService
     updater: CrawlingScihubDomainUpdater
@@ -38,7 +39,7 @@ class ScihubTask(BaseTask):
                  source_type: str = 'doi',
                  scihub_url: str | None = None,
                  scihub_url_chooser_cls: type[ScihubUrlChooser] = default_chooser_cls,
-                 out: str | None = None,
+                 out: Path | None = None,
                  proxies: dict[str, str] | None = None) -> None:
         super().__init__()
         self.source_keyword = source_keyword
@@ -82,19 +83,20 @@ class ScihubTask(BaseTask):
 
         if self.out is None:
             # Using title as the filename and save to current directory.
-            out = pdf_url_title_info['title'] + '.pdf'
+            self.out = Path(pdf_url_title_info['title'] + '.pdf')
         else:
-            dirpath, filename = os.path.split(self.out)
-            if dirpath != '' and not os.path.exists(dirpath):
-                os.makedirs(dirpath)
+            dirpath = self.out.parent
+            filename = self.out.name
+            if not dirpath.exists():
+                dirpath.mkdir(parents=True, exist_ok=True)
             if len(filename) == 0:
                 filename = pdf_url_title_info.get_title() + '.pdf'
-            if not filename.endswith("pdf") and not filename.endswith("PDF"):
+            if not (filename.endswith("pdf") or filename.endswith("PDF")):
                 filename += '.pdf'
-            out = os.path.join(dirpath, filename)
+            self.out = dirpath / filename
 
         downloader = UrlDownloader(pdf_url_title_info, self)
-        downloader.download(out)
+        downloader.download(self.out)
         referer_url = self.context.get('referer', None)
         referer_url = referer_url if isinstance(referer_url, str) else None
         self.service.increment_success_times(referer_url)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Implementations of DomainUpdater"""
+
 import re
 import string
 from concurrent.futures import ThreadPoolExecutor, as_completed

@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 """Source implementations."""
+
 from collections.abc import Callable
 from typing import Any
 
