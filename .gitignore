@@ -25,3 +25,6 @@ paper
 # Others
 DEPLOYMENT.md
 playground.*
+
+.direnv
+.mypy_cache
