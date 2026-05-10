@@ -6,16 +6,15 @@ from configparser import ConfigParser
 from threading import RLock
 
 
-class GlobalConfig(object):
+class GlobalConfig:
     _lock: RLock = RLock()
     _config: ConfigParser | None = None
-    package_dir: Path = Path(__file__).parent
-    config_fpath: Path = (package_dir / "config/global.ini").resolve()
+    config_fpath: Path = Path(__file__).resolve().parent / "config/global.ini"
 
     def _config_init(self) -> ConfigParser:
         # Check if config file exists.
-        if self.config_fpath.is_dir():
-            print("Config file not found: %s" % self.config_fpath)
+        if not (self.config_fpath.exists() and self.config_fpath.is_file()):
+            print(f"Config file not found: {self.config_fpath.as_posix()}")
             sys.exit(2)
 
         # Read configs.

@@ -24,6 +24,7 @@ from scidownl.core.source import PmidSource, DoiSource
 from scidownl.core.crawler import ScihubCrawler
 from scidownl.exception import CrawlException
 
+
 class TestCrawler(unittest.TestCase):
     def test_scihub_crawl(self) -> None:
         scihub_url = "https://sci-hub.st"

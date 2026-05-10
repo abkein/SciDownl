@@ -58,7 +58,6 @@
             loguru
             pysocks
             sqlalchemy
-            tablib
             wget
             setuptools
             curl-cffi
@@ -80,7 +79,7 @@
             black
             autopep8
             ruff
-          ] ++ tablib.optional-dependencies.cli
+          ]
         );
       in
       {
