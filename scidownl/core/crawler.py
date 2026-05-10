@@ -16,7 +16,7 @@ class ScihubCrawler(BaseCrawler, BaseTaskStep):
 
     OK_STATUS_CODES = [200]
 
-    def __init__(self, source: BaseSource, scihub_url: str, task: BaseTask = None):
+    def __init__(self, source: BaseSource, scihub_url: str, task: BaseTask | None = None):
         BaseCrawler.__init__(self, source)
         BaseTaskStep.__init__(self, task)
         self.scihub_url = scihub_url

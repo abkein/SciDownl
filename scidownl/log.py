@@ -15,7 +15,7 @@ configs: ConfigParser = get_config()
 class LoggerLoader:
     _init_status: bool = False
     _lock: RLock = RLock()
-    _loggers = {}
+    _loggers: dict[str, Any] = {}
 
     def _log_init(self):
         """Initialize loggings."""
@@ -37,13 +37,13 @@ class LoggerLoader:
         return loggers
 
     @staticmethod
-    def _make_filter(name: str) -> Callable[[dict[str, dict[str, Any]]], bool]:
-        def f(record: dict[str, dict[str, Any]]) -> bool:
+    def _make_filter(name: str) -> Callable[[Any], bool]:
+        def f(record: Any) -> bool:
             return record["extra"].get("name") == name
         return f
 
     @staticmethod
-    def load(logger_name: str):
+    def load(logger_name: str) -> Any:
         """Returns the loguru.Logger based on logger name.
 
         :param logger_name: Logger name.
@@ -57,6 +57,6 @@ class LoggerLoader:
         return LoggerLoader._loggers.get(logger_name)
 
 
-def get_logger(name: str | None = None):
+def get_logger(name: str | None = None) -> Any:
     name = name or 'default'
     return LoggerLoader.load(name)

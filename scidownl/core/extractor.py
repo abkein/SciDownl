@@ -21,8 +21,8 @@ def get_default_referer():
     scihub_url_chooser_type = configs['scihub.task']['scihub_url_chooser_type']
     chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, AvailabilityFirstScihubUrlChooser)
     chooser = chooser_cls()
-    scihub_url = "https://sci-hub.se" if len(chooser) == 0 else chooser.next().url
-    return scihub_url
+    selected_url = chooser.next() if len(chooser) > 0 else None
+    return "https://sci-hub.se" if selected_url is None else selected_url.url
 
 
 class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
@@ -32,7 +32,7 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
     # choose the first scihub url with the chooser defined in config.
     DEFAULT_REFERER = get_default_referer()
 
-    def __init__(self, content: HtmlContent, task: BaseTask = None):
+    def __init__(self, content: HtmlContent, task: BaseTask | None = None):
         BaseExtractor.__init__(self, content)
         BaseTaskStep.__init__(self, task)
         self.task = task
@@ -91,7 +91,7 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
             raise PdfTagNotFoundException(f"No pdf tag was found in the given content "
                                           f"with the selector: {self.pdf_tag_selector}")
         raw_url = pdf_tag.attrs.get(self.pdf_tag_attr)
-        if raw_url is None:
+        if not isinstance(raw_url, str):
             raise PdfUrlNotFoundException(f"No pdf url was found in the pdf tag: {pdf_tag.get_text()} "
                                           f"with the attr {self.pdf_tag_attr}")
         return raw_url
@@ -104,7 +104,7 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
                 or '|' not in soup_title.text:
             title = ""
         else:
-            title = soup.title.text.split('|')[1]
+            title = soup_title.text.split('|')[1]
         return self._clean_title(title)
 
     @staticmethod
@@ -112,4 +112,3 @@ class HtmlPdfExtractor(BaseExtractor, BaseTaskStep):
         rstr = r"[\/\\\:\*\?\"\<\>\|]"  # / \ : * ? " < > |
         title = re.sub(rstr, " ", title)[:200]
         return title.strip()
-

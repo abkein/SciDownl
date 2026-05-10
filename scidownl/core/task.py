@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 """Task implementations."""
 import os.path
+from typing import Any
 
 from .base import BaseTask, ScihubUrlChooser
 from .source import DoiSource, source_classes
@@ -23,12 +24,12 @@ default_chooser_cls = scihub_url_choosers.get(scihub_url_chooser_type, Availabil
 class ScihubTask(BaseTask):
 
     def __init__(self,
-                 source_keyword: str,
+                 source_keyword: Any,
                  source_type: str = 'doi',
-                 scihub_url: str = None,
+                 scihub_url: str | None = None,
                  scihub_url_chooser_cls=default_chooser_cls,
-                 out: str = None,
-                 proxies: dict = None):
+                 out: str | None = None,
+                 proxies: dict | None = None):
         super().__init__()
         self.source_keyword = source_keyword
         self.scihub_url_chooser_cls = scihub_url_chooser_cls
@@ -61,7 +62,7 @@ class ScihubTask(BaseTask):
                 continue
         logger.error(f"Failed to download the paper: {self.source_keyword}. Please try again.")
 
-    def _run(self, scihub_url):
+    def _run(self, scihub_url: str) -> None:
         source = self.source_class(self.source_keyword)
         crawler = ScihubCrawler(source, scihub_url, self)
         content = crawler.crawl()
@@ -77,12 +78,12 @@ class ScihubTask(BaseTask):
             if dirpath != '' and not os.path.exists(dirpath):
                 os.makedirs(dirpath)
             if len(filename) == 0:
-                filename = pdf_url_title_info['title'] + '.pdf'
+                filename = pdf_url_title_info.get_title() + '.pdf'
             if not filename.endswith("pdf") and not filename.endswith("PDF"):
                 filename += '.pdf'
             out = os.path.join(dirpath, filename)
 
         downloader = UrlDownloader(pdf_url_title_info, self)
         downloader.download(out)
-        scihub_url = self.context.get('referer', None)
-        self.service.increment_success_times(scihub_url)
+        referer_url = self.context.get('referer', None)
+        self.service.increment_success_times(referer_url)

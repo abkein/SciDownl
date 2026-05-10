@@ -17,7 +17,7 @@ logger = get_logger()
 class UrlDownloader(BaseDownloader, BaseTaskStep):
     """Downloader of url."""
 
-    def __init__(self, information: UrlInformation, task: BaseTask = None):
+    def __init__(self, information: UrlInformation, task: BaseTask | None = None):
         BaseDownloader.__init__(self, information)
         BaseTaskStep.__init__(self, task)
         self.information = information
@@ -68,4 +68,3 @@ class UrlDownloader(BaseDownloader, BaseTaskStep):
                 self.service.increment_failed_times(scihub_url)
             raise DownloadException(f"Error occurs when downloading {e}")
         return filename
-

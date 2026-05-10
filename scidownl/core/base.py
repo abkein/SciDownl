@@ -2,7 +2,7 @@
 """Core base abstract classes"""
 from abc import ABC, abstractmethod
 from os import PathLike
-from typing import Union, Iterable, List, Optional
+from typing import Any, Optional
 
 from ..db.entities import ScihubUrl
 
@@ -10,7 +10,7 @@ from ..db.entities import ScihubUrl
 class BaseTask(ABC):
     """Abstract task with a `run` method."""
     def __init__(self):
-        self.context = {}
+        self.context: dict[str, Any] = {}
 
     @abstractmethod
     def run(self):
@@ -22,7 +22,7 @@ class BaseTaskStep(ABC):
     """Abstract task step if a task.
     Every task step can access the task context.
     """
-    def __init__(self, task: BaseTask):
+    def __init__(self, task: BaseTask | None):
         self.task = task
 
 
@@ -108,7 +108,7 @@ class DomainUpdater(ABC):
     """Abstract domain updater"""
 
     @abstractmethod
-    def update_domains(self) -> Union[List, Iterable[str]]:
+    def update_domains(self) -> list:
         """Returns a sequence of urls."""
         raise NotImplementedError("Implement update_domain method before calling it.")
 
@@ -129,5 +129,5 @@ class ScihubUrlChooser(ABC):
     def __next__(self):
         return self.next()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return 0

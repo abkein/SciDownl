@@ -2,7 +2,6 @@
 """Implementations of DomainUpdater"""
 import re
 import string
-from typing import Iterable, Union, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
@@ -20,7 +19,7 @@ configs = get_config()
 
 class CrawlingScihubDomainUpdater(DomainUpdater):
     """Updater of Scihub domains by crawling a domain source."""
-    def __init__(self, domain_source_url: str = None):
+    def __init__(self, domain_source_url: str | None = None):
         super().__init__()
         self.service = ScihubUrlService()
 
@@ -29,7 +28,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         self._domain_url_pattern = configs['scihub.domain.updater.crawl']['scihub_url_pattern']
         self._exclude_url_pattern = configs['scihub.domain.updater.crawl']['exclude_url_pattern']
 
-    def update_domains(self) -> Union[List, Iterable[ScihubUrl]]:
+    def update_domains(self) -> list[str]:
         html = requests.get(self.domain_source_url).text
         domain_urls = re.findall(self._domain_url_pattern, html)
 
@@ -45,7 +44,7 @@ class CrawlingScihubDomainUpdater(DomainUpdater):
         logger.info(f"Saved {len(urls_to_save)} SciHub domains to local db.")
         return available_domain_urls
 
-    def _exclude_domain_urls(self, domain_urls, exclude_url_pattern: str = None):
+    def _exclude_domain_urls(self, domain_urls: list[str], exclude_url_pattern: str | None = None) -> list[str]:
         exclude_url_pattern = exclude_url_pattern or self._exclude_url_pattern
         remain_urls = []
         for url in domain_urls:
@@ -59,8 +58,8 @@ class SearchScihubDomainUpdater(DomainUpdater):
 
     OK_STATUS_CODES = [200]
 
-    def __init__(self, title_keyword_pattern: str = None, num_workers: int = None,
-                 timeout: int = None):
+    def __init__(self, title_keyword_pattern: str | None = None, num_workers: int | None = None,
+                 timeout: int | None = None):
         super().__init__()
         self.service = ScihubUrlService()
 
@@ -68,10 +67,10 @@ class SearchScihubDomainUpdater(DomainUpdater):
         self._domain_prefixes = ["http://sci-hub.", "https://sci-hub."]
         self._keyword_pattern = title_keyword_pattern or \
             configs['scihub.domain.updater.search']['scihub_title_keyword_pattern']
-        self._num_workers = num_workers or configs['scihub.domain.updater.search'].getint('num_workers')
-        self._timeout = timeout or configs['scihub.domain.updater.search'].getint('check_timeout')
+        self._num_workers = num_workers or configs['scihub.domain.updater.search'].getint('num_workers') or 1
+        self._timeout = timeout or configs['scihub.domain.updater.search'].getint('check_timeout') or 60
 
-    def update_domains(self) -> Union[List, Iterable[str]]:
+    def update_domains(self) -> list[str]:
         search_urls = self._get_search_urls()
         logger.info(f"# Search valid SciHub domains from {len(search_urls)} urls")
 

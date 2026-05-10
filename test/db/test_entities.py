@@ -37,6 +37,7 @@ class TestEntities(unittest.TestCase):
         non_exist_url = ScihubUrl(url="http://sci-hub.non-exist")
         session = Session()
         exist_rec = session.query(ScihubUrl).filter_by(url=exist_url.url).first()
+        assert exist_rec is not None
         self.assertEqual(exist_url.url, exist_rec.url)
         non_exist_rec = session.query(ScihubUrl).filter_by(url=non_exist_url.url).first()
         self.assertIsNone(non_exist_rec)
@@ -49,7 +50,9 @@ class TestEntities(unittest.TestCase):
             ScihubUrl.success_times: ScihubUrl.success_times + 1
         })
         session.commit()
-        modified_success_times = session.query(ScihubUrl).filter_by(url=modify_url.url).first().success_times
+        modified_rec = session.query(ScihubUrl).filter_by(url=modify_url.url).first()
+        assert modified_rec is not None
+        modified_success_times = modified_rec.success_times
         self.assertGreaterEqual(modified_success_times, 1)
         session.close()
 

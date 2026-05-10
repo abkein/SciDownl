@@ -7,9 +7,9 @@ from ..core.task import ScihubTask
 def scihub_download(
         keyword: str,
         paper_type: str = 'doi',
-        scihub_url: str = None,
-        out: str = None,
-        proxies: dict = None
+        scihub_url: str | None = None,
+        out: str | None = None,
+        proxies: dict | None = None
     ) -> None:
     """Download a paper from SciHub.
 
@@ -35,4 +35,3 @@ def scihub_download(
         out=out,
         proxies=proxies
     ).run()
-

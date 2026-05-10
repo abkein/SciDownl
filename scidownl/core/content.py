@@ -6,7 +6,7 @@ from .base import BaseContent
 
 class HtmlContent(BaseContent):
     """Content stores html string."""
-    def __init__(self, html: str = None):
+    def __init__(self, html: str | None = None):
         super().__init__(html)
         self.type = 'html'
 
@@ -19,7 +19,7 @@ class HtmlContent(BaseContent):
 
 class JsonContent(BaseContent):
     """Content stores JSON object."""
-    def __init__(self, json: dict = None):
+    def __init__(self, json: dict | None = None):
         super().__init__(json)
         self.type = 'json'
 

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """Source implementations."""
-from typing import Union
+from typing import Any, Union
 
 from .base import BaseSource
 from ..exception import EmptyDoiException, EmptyPmidException, EmptyTitleException
@@ -11,7 +11,7 @@ class DoiSource(BaseSource):
 
     DOI_PROTOCOLS = ["http://", "https://"]
 
-    def __init__(self, doi: str):
+    def __init__(self, doi: Any):
         super().__init__()
         self.doi = self._clean_doi(doi)
         self.protocol = self._extract_protocol(doi)
@@ -20,7 +20,7 @@ class DoiSource(BaseSource):
         self['protocol'] = self.protocol
 
     @staticmethod
-    def _clean_doi(doi: str) -> str:
+    def _clean_doi(doi: Any) -> str:
         if doi is None:
             raise EmptyDoiException("Empty doi is given")
         if not isinstance(doi, str):
@@ -33,7 +33,9 @@ class DoiSource(BaseSource):
         return doi
 
     @staticmethod
-    def _extract_protocol(doi: str) -> str:
+    def _extract_protocol(doi: Any) -> str:
+        if not isinstance(doi, str):
+            return "https"
         for proto in DoiSource.DOI_PROTOCOLS:
             if proto in doi:
                 return proto.split(":")[0]
@@ -51,14 +53,14 @@ class DoiSource(BaseSource):
 
 class PmidSource(BaseSource):
     """A PMID source dict."""
-    def __init__(self, pmid: Union[str, int]):
+    def __init__(self, pmid: Any):
         super().__init__()
         self.pmid = self._clean_pmid(pmid)
         self.type = 'pmid'
         self[self.type] = self.pmid
 
     @staticmethod
-    def _clean_pmid(pmid: str) -> str:
+    def _clean_pmid(pmid: Any) -> str:
         if pmid is None:
             raise EmptyPmidException("Empty pmid is given")
         if not isinstance(pmid, str) and not isinstance(pmid, int) \
@@ -79,14 +81,14 @@ class PmidSource(BaseSource):
 
 class TitleSource(BaseSource):
     """A title source dict."""
-    def __init__(self, title: str):
+    def __init__(self, title: Any):
         super().__init__()
         self.title = self._clean_title(title)
         self.type = 'title'
         self[self.type] = self.title
 
     @staticmethod
-    def _clean_title(title: str) -> str:
+    def _clean_title(title: Any) -> str:
         if title is None:
             raise EmptyTitleException("Empty title is given")
         if not isinstance(title, str):

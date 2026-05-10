@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Services to manipulate entities"""
-from typing import List, Union
-
 from sqlalchemy.orm import sessionmaker
 
 from ..log import get_logger
@@ -17,7 +15,7 @@ class ScihubUrlService:
         self.engine = get_engine(test=test)
         self.session_class = sessionmaker(bind=self.engine)
 
-    def add_urls(self, urls: Union[List[ScihubUrl]]) -> None:
+    def add_urls(self, urls: list[ScihubUrl] | None) -> None:
         if urls is None or len(urls) == 0:
             return
         session = self.session_class()
@@ -29,7 +27,7 @@ class ScihubUrlService:
                 session.rollback()
         session.close()
 
-    def increment_success_times(self, url: str) -> None:
+    def increment_success_times(self, url: str | None) -> None:
         if url is None or not isinstance(url, str):
             return
         session = self.session_class()
@@ -43,7 +41,7 @@ class ScihubUrlService:
             session.rollback()
         session.close()
 
-    def increment_failed_times(self, url: str) -> None:
+    def increment_failed_times(self, url: str | None) -> None:
         if url is None or not isinstance(url, str):
             return
         session = self.session_class()
@@ -57,7 +55,7 @@ class ScihubUrlService:
             session.rollback()
         session.close()
 
-    def get_all_urls(self) -> List[ScihubUrl]:
+    def get_all_urls(self) -> list[ScihubUrl]:
         session = self.session_class()
         all_urls = session.query(ScihubUrl).all()
         session.close()
