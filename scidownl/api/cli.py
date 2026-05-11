@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """Command line tool of scidownl."""
 
-import argparse
+import re
 import sys
+import argparse
+from dataclasses import dataclass
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Callable, TypedDict, cast
+from typing import Callable, Literal, TypedDict, cast
 
 from ..log import get_logger
+from ..core.proxyspec import ProxySpec
 
 logger = get_logger()
 
@@ -17,20 +20,26 @@ class DownloadTaskKwargs(TypedDict):
     source_type: str
     scihub_url: str | None
     out: Path | None
-    proxies: dict[str, str]
+    proxies: ProxySpec | None
 
 
-def config(location: bool, get: tuple[str, str] | None) -> None:
+@dataclass
+class ConfigArgs:
+    location: bool
+    get: tuple[str, str] | None
+
+
+def config(args: ConfigArgs) -> None:
     """Get global configs."""
     from ..config import get_config, GlobalConfig
 
     configs = get_config()
-    if location:
+    if args.location:
         logger.info(f"Global config file path: {GlobalConfig.config_fpath}")
         return
 
-    if get:
-        sec, key = get
+    if args.get is not None:
+        sec, key = args.get
         if sec not in configs.sections():
             logger.warning(f"Section '{sec}' is not found. Valid sections: {configs.sections()}")
             return
@@ -41,16 +50,36 @@ def config(location: bool, get: tuple[str, str] | None) -> None:
         logger.info(f"Value: {configs[sec][key]}")
 
 
-def update_domains(mode: str) -> None:
+def _run_config(args: argparse.Namespace) -> None:
+    location: bool = bool(args.location)
+    config_get: tuple[str, str] | None = (str(args.get[0]), str(args.get[1])) if args.get is not None else None
+    config(
+        ConfigArgs(
+            location=location,
+            get=config_get,
+        )
+    )
+
+
+@dataclass
+class DomainUpdateArgs:
+    mode: str
+
+
+def update_domains(args: DomainUpdateArgs) -> None:
     """Update available SciHub domains and save them to local db."""
     from ..core.updater import scihub_domain_updaters
 
-    updater_cls = scihub_domain_updaters.get(mode, None)
+    updater_cls = scihub_domain_updaters.get(args.mode, None)
     if updater_cls is None:
-        logger.error(f"Update mode (-m) must be one of {list(scihub_domain_updaters.keys())}, got '{mode}' instead.")
+        logger.error(f"Update mode (-m) must be one of {list(scihub_domain_updaters.keys())}, got '{args.mode}' instead.")
         return
     updater = updater_cls()
     updater.update_domains()
+
+
+def _run_update_domains(args: argparse.Namespace) -> None:
+    update_domains(DomainUpdateArgs(mode=str(args.mode)))
 
 
 def list_domains() -> None:
@@ -65,14 +94,21 @@ def list_domains() -> None:
         print((url.url, url.success_times, url.failed_times))
 
 
-def download(
-    doi: tuple[str, ...],
-    pmid: tuple[int, ...],
-    title: tuple[str, ...],
-    out: Path | None,
-    scihub_url: str | None,
-    proxy: str | None,
-) -> None:
+def _run_list_domains(args: argparse.Namespace) -> None:
+    list_domains()
+
+
+@dataclass
+class DownloadArgs:
+    doi: list[str]
+    pmid: list[int]
+    title: list[str]
+    out: Path | None
+    scihub_url: str | None
+    proxies: list[str]
+
+
+def download(args: DownloadArgs) -> None:
     """Download paper(s) by DOI or PMID."""
     from ..core.task import ScihubTask
     from ..config import get_config
@@ -80,72 +116,87 @@ def download(
     configs = get_config()
 
     logger.info("Run scihub tasks. Tasks information: ")
-    if len(doi) > 0:
-        logger.info("%15s: %s" % ("DOI(s)", list(doi)))
-    if len(pmid) > 0:
-        logger.info("%15s: %s" % ("PMID(s)", list(pmid)))
-    if len(title) > 0:
-        logger.info("%15s: %s" % ("TITLE(s)", list(title)))
+    if len(args.doi) > 0:
+        logger.info("%15s: %s" % ("DOI(s)", list(args.doi)))
+    if len(args.pmid) > 0:
+        logger.info("%15s: %s" % ("PMID(s)", list(args.pmid)))
+    if len(args.title) > 0:
+        logger.info("%15s: %s" % ("TITLE(s)", list(args.title)))
 
-    if out is None:
-        logger.info("%15s: %s" % ("Output", Path("./").resolve().as_posix()))
+    out: Path
+    if args.out is None:
+        out = Path("./").resolve()
+        logger.info("%15s: %s" % ("Output", out.as_posix()))
     else:
-        logger.info("%15s: %s" % ("Output", out))
+        out = args.out
+        logger.info("%15s: %s" % ("Output", out.as_posix()))
 
-    if scihub_url is None:
+    if args.scihub_url is None:
         logger.info("%15s: <auto.%s>" % ("SciHub Url", configs["scihub.task"]["scihub_url_chooser_type"]))
     else:
-        logger.info("%15s: %s" % ("SciHub Url", scihub_url))
+        logger.info("%15s: %s" % ("SciHub Url", args.scihub_url))
 
     # Always consider out as a directory if there are multiple DOIs and PMIDs.
     # if len(doi) + len(pmid) + len(title) > 1:
     #     if out is not None and out[-1] != "/":
     #         out = out + '/'
 
-    proxies: dict[str, str] = {}
+    proxies: ProxySpec = {}
     # Load proxies configured in global configurations.
-    http_proxy = configs["proxy"].get("http")
+    http_proxy = configs["proxy"].get("http", None)
     if http_proxy is not None:
         proxies["http"] = http_proxy
-    https_proxy = configs["proxy"].get("https")
+    https_proxy = configs["proxy"].get("https", None)
     if https_proxy is not None:
         proxies["https"] = https_proxy
 
     # Overwrite the proxy with the user specified proxy.
-    if proxy is not None and "=" in proxy:
-        scheme, proxy_address = proxy.split("=")[:2]
-        proxies[scheme] = proxy_address
+    for proxy in args.proxies:
+        match = re.match(r"^(\w+):\/\/([\w\.]+(?:\:\d+)?)$", proxy)
+        if match is not None:
+            schema: str = match.group(1)
+            address: str = match.group(2)
+            if schema in ProxySpec.__mutable_keys__:
+                proxies[cast(Literal["all", "http", "https", "ws", "wss"], schema)] = address
+            else:
+                msg = f"Proxy schema must be one of {list(ProxySpec.__mutable_keys__)}, got: '{schema}'. Skipping."
+                logger.error(msg)
+                # raise RuntimeError(msg)
+        else:
+            msg = f"Invalid proxy specification. Proxy should be in form 'SCHEMA://ADDRESS[:PORT]', got: '{proxy}'. Skipping."
+            logger.error(msg)
+            # raise RuntimeError(msg)
 
     if len(proxies) > 0:
-        logger.info(f"Proxies: {proxies}")
+        logger.info(f"Following proxies were successfully configured: {proxies}")
 
     tasks: list[DownloadTaskKwargs] = []
-    for doi_item in doi:
+    for doi_item in args.doi:
         tasks.append(
             {
                 "source_keyword": doi_item,
                 "source_type": "doi",
-                "scihub_url": scihub_url,
+                "scihub_url": args.scihub_url,
                 "out": out,
                 "proxies": proxies,
             }
         )
-    for pmid_item in pmid:
+    for pmid_item in args.pmid:
         tasks.append(
             {
                 "source_keyword": pmid_item,
                 "source_type": "pmid",
-                "scihub_url": scihub_url,
+                "scihub_url": args.scihub_url,
                 "out": out,
                 "proxies": proxies,
             }
         )
-    for title_item in title:
+    for title_item in args.title:
         tasks.append(
             {
                 "source_keyword": title_item,
                 "source_type": "title",
-                "scihub_url": scihub_url,
+                "scihub_url": args.scihub_url,
                 "out": out,
                 "proxies": proxies,
             }
@@ -158,48 +209,26 @@ def download(
             logger.error(f"final status: {task.context['status']}, error: {task.context['error']}")
 
 
-class ConfigArgs(argparse.Namespace):
-    location: bool
-    get: list[str] | None
-
-
-class DomainUpdateArgs(argparse.Namespace):
-    mode: str
-
-
-class DownloadArgs(argparse.Namespace):
-    doi: list[str] | None
-    pmid: list[int] | None
-    title: list[str] | None
-    out: Path | None
-    scihub_url: str | None
-    proxy: str | None
-
-
-def _run_config(args: argparse.Namespace) -> None:
-    typed_args = cast(ConfigArgs, args)
-    config_get = (typed_args.get[0], typed_args.get[1]) if typed_args.get is not None else None
-    config(location=typed_args.location, get=config_get)
-
-
-def _run_update_domains(args: argparse.Namespace) -> None:
-    typed_args = cast(DomainUpdateArgs, args)
-    update_domains(mode=typed_args.mode)
-
-
-def _run_list_domains(args: argparse.Namespace) -> None:
-    list_domains()
-
-
 def _run_download(args: argparse.Namespace) -> None:
-    typed_args = cast(DownloadArgs, args)
+    _doi: list[str] = list(args.doi) if args.doi is not None else list()
+    doi: list[str] = [str(e) for e in _doi]
+    _pmid: list[str] = list(args.pmid) if args.pmid is not None else list()
+    pmid: list[int] = [int(e) for e in _pmid]
+    _title: list[str] = list(args.title) if args.title is not None else list()
+    title: list[str] = [str(e) for e in _title]
+    out: Path | None = Path(args.out) if args.out is not None else None
+    scihub_url: str | None = str(args.scihub_url) if args.scihub_url is not None else None
+    _proxies: list[str] = list(args.proxy) if args.proxy is not None else list()
+    proxies: list[str] = [str(e) for e in _proxies]
     download(
-        doi=tuple(typed_args.doi or ()),
-        pmid=tuple(typed_args.pmid or ()),
-        title=tuple(typed_args.title or ()),
-        out=typed_args.out,
-        scihub_url=typed_args.scihub_url,
-        proxy=typed_args.proxy,
+        DownloadArgs(
+            doi=doi,
+            pmid=pmid,
+            title=title,
+            out=out,
+            scihub_url=scihub_url,
+            proxies=proxies,
+        )
     )
 
 
@@ -224,20 +253,21 @@ def build_parser() -> argparse.ArgumentParser:
     config_parser.set_defaults(func=_run_config)
 
     update_parser = subparsers.add_parser(
-        "domain.update",
+        "update",
         help="Update available SciHub domains and save them to local db.",
         description="Update available SciHub domains and save them to local db.",
     )
     update_parser.add_argument(
         "-m",
         "--mode",
+        choices=["crawl", "search"],
         default="crawl",
         help="update mode, could be 'crawl' or 'search', default mode is 'crawl'.",
     )
     update_parser.set_defaults(func=_run_update_domains)
 
     list_parser = subparsers.add_parser(
-        "domain.list",
+        "list",
         help="List available SciHub domains in local db.",
         description="List available SciHub domains in local db.",
     )
@@ -288,7 +318,9 @@ def build_parser() -> argparse.ArgumentParser:
     download_parser.add_argument(
         "-x",
         "--proxy",
-        help="Proxy with the format of SCHEME=PROXY_ADDRESS. e.g., --proxy http=http://127.0.0.1:7890.",
+        action="append",
+        help="Proxy with the format of SCHEMA://ADDRESS[:PORT]. e.g., --proxy http://127.0.0.1:7890.",
+        default=[],
     )
     download_parser.set_defaults(func=_run_download)
 

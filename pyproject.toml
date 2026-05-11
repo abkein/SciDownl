@@ -15,7 +15,6 @@ authors = [
 ]
 dependencies = [
   "beautifulsoup4>=4.10.0",
-  "loguru>=0.6.0",
   "requests>=2.27.1",
   "PySocks",
   "wget>=3.2",

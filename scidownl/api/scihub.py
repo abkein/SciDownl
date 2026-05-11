@@ -4,6 +4,7 @@
 from pathlib import Path
 
 from ..core.task import ScihubTask
+from ..core.proxyspec import ProxySpec
 
 
 def scihub_download(
@@ -11,7 +12,7 @@ def scihub_download(
     paper_type: str = "doi",
     scihub_url: str | None = None,
     out: Path | None = None,
-    proxies: dict[str, str] | None = None,
+    proxies: ProxySpec | None = None,
     timeout: int | None = None,
 ) -> None:
     """Download a paper from SciHub.

@@ -12,6 +12,7 @@ from .extractor import HtmlPdfExtractor
 from .downloader import UrlDownloader
 from .chooser import AvailabilityFirstScihubUrlChooser, scihub_url_choosers
 from .updater import CrawlingScihubDomainUpdater
+from .proxyspec import ProxySpec
 from ..log import get_logger
 from ..config import get_config
 from ..db.service import ScihubUrlService
@@ -29,11 +30,11 @@ class ScihubTask(BaseTask):
     scihub_url_chooser: ScihubUrlChooser
     scihub_url: str | None
     source_class: Callable[[Any], BaseSource]
-    out: Path | None
-    proxies: dict[str, str]
+    out: Path | None = None
+    proxies: ProxySpec | None = None
     service: ScihubUrlService
     updater: CrawlingScihubDomainUpdater
-    timeout: int | None
+    timeout: int | None = None
 
     def __init__(
         self,
@@ -42,7 +43,7 @@ class ScihubTask(BaseTask):
         scihub_url: str | None = None,
         scihub_url_chooser_cls: type[ScihubUrlChooser] = default_chooser_cls,
         out: Path | None = None,
-        proxies: dict[str, str] | None = None,
+        proxies: ProxySpec | None = None,
         timeout: int | None = None,
     ) -> None:
         super().__init__()
@@ -52,7 +53,7 @@ class ScihubTask(BaseTask):
         self.scihub_url = scihub_url
         self.source_class = source_classes.get(source_type, DoiSource)
         self.out = out
-        self.proxies = proxies or {}
+        self.proxies = proxies
         self.timeout = timeout
         self.context["status"] = "initialized"
         self.context["proxies"] = self.proxies

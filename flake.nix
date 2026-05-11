@@ -54,7 +54,6 @@
             retrying
 
             beautifulsoup4
-            loguru
             pysocks
             wget
             setuptools
